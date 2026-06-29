@@ -208,8 +208,24 @@ body.visor .canvas-wrap{cursor:default!important;}
 
 @media(max-width:700px){
   .edificios-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));padding:12px;}
-  .side-panel{width:100%;max-height:50vh;border-left:none;border-top:2px solid var(--gray-line);}
+  .side-panel{width:100%;max-height:45vh;border-left:none;border-top:2px solid var(--gray-line);}
   .plano-main{flex-direction:column;}
+  .plano-toolbar{gap:5px;padding:5px 8px;overflow-x:auto;flex-wrap:nowrap;}
+  .nivel-tabs{gap:2px;}
+  .nivel-tab{padding:4px 8px;font-size:11px;}
+  .btn{padding:4px 8px;font-size:10px;}
+  .legend{display:none;}
+  .pin-count{font-size:10px;}
+}
+@media(orientation:portrait){
+  #screenPlano{height:100vh;}
+  .plano-main{flex-direction:column;}
+  .canvas-wrap{flex:1;min-height:45vh;}
+  .side-panel{width:100%;height:auto;max-height:45vh;border-left:none;border-top:2px solid var(--gray-line);}
+}
+@media(orientation:landscape){
+  .plano-main{flex-direction:row;}
+  .side-panel{width:300px;height:auto;max-height:none;border-left:2px solid var(--gray-line);border-top:none;}
 }
 @media print{
   .plano-toolbar,.side-panel,.app-header,.nivel-tabs{display:none!important;}
@@ -307,6 +323,9 @@ body.visor .canvas-wrap{cursor:default!important;}
     </div>
     <span class="pin-count" id="pinCount">0 pins</span>
     <span class="sync-label" id="syncLabel"></span>
+    <select id="filtroContratista" onchange="aplicarFiltro()" style="font-size:11px;padding:4px 8px;border:1.5px solid var(--gray-line);border-radius:4px;font-family:'Inter',sans-serif;color:var(--navy);background:#fff;max-width:160px;">
+      <option value="">— Todos los contratistas —</option>
+    </select>
   </div>
 
   <div class="plano-main">
@@ -406,6 +425,7 @@ const PLANOS = {
 const EDIFICIOS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23, 24];
 const NIVELES = ['N1', 'N2', 'N3', 'N4', 'N5'];
 const STATUS_COLORS = {'OK': '#38A169', 'Observación': '#D69E2E', 'Defecto': '#E53E3E', 'Pendiente': '#718096', 'Corrección requerida': '#C05621'};
+const CONTRATISTAS = ['SEMS', 'NESA', 'ABREU & ASOC', 'RJJ', 'GETOP', 'JOVECA', 'TEPINTEC', 'GLASSART', 'SINERGAMA', 'NOVOINSTALL', 'TALLERES BELLO', 'JARDINERIA ANAMARIA', 'REGADIO SOCRATES', 'MAESTRO VICTOR', 'MAESTRO ANGEL', 'MAESTRO ROBERT', 'MAESTRO LUIS'];
 const CATS = ["", "1-Estructura / Formaleta", "2-Vaciado de Concreto", "3-Varilla / Acero", "4-Pisos / Revestimiento", "5-Instalaciones Hidrosanitarias", "6-Instalaciones Eléctricas", "7-Estuco Acabados", "8-Pañete Acabados", "9-Impermeabilizante", "10-Albañilería / Mampostería", "11-Puertas", "12-Closets", "13-Ventanas", "14-Cocinas", "15-Terminación Yeso", "16-Terminación Denglas", "17-Movilización de Materiales y Otros"];
 
 // ── STATE ────────────────────────────────────────────────────────────────
@@ -419,6 +439,7 @@ let currentPin = null;
 let activeTab = 'form';
 let unsubscribeListener = null;
 let edificioStats = {};
+let edificioContratistas = {};
 
 NIVELES.forEach(n => allPins[n] = []);
 
@@ -501,6 +522,7 @@ async function cargarEstadisticas() {
   try {
     const snap = await getDocs(collection(db,'pins'));
     edificioStats = {};
+    edificioContratistas = {};
     snap.forEach(d => {
       const p = d.data();
       const key = p.edificio || 'desconocido';
@@ -509,6 +531,13 @@ async function cargarEstadisticas() {
       if (p.estado==='OK') edificioStats[key].ok++;
       else if (p.estado==='Defecto'||p.estado==='Corrección requerida') edificioStats[key].def++;
       else edificioStats[key].pend++;
+      // Track contratistas
+      if (!edificioContratistas[key]) edificioContratistas[key] = new Set();
+      (p.contratistas||[]).forEach(c => edificioContratistas[key].add(c));
+    });
+    // Convert sets to arrays
+    Object.keys(edificioContratistas).forEach(k => {
+      edificioContratistas[k] = Array.from(edificioContratistas[k]);
     });
     renderEdificios();
   } catch(e) { renderEdificios(); }
@@ -522,6 +551,9 @@ function renderEdificios() {
     const st = edificioStats[key] || {total:0,ok:0,def:0,pend:0};
     totalPins += st.total;
     const cls = st.total===0?'sin-actividad':st.def>0?'en-proceso':'completado';
+    const conts = edificioContratistas[key] || [];
+    const contsHTML = conts.length > 0
+      ? `<div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:4px;">${conts.slice(0,4).map(c=>`<span style="font-size:9px;background:rgba(27,58,107,0.1);color:var(--navy);padding:1px 5px;border-radius:8px;font-weight:600;">${c}</span>`).join('')}${conts.length>4?`<span style="font-size:9px;color:var(--gray);">+${conts.length-4}</span>`:''}</div>` : '';
     const statsHTML = st.total===0
       ? `<div class="ec-empty">Sin registros</div>`
       : `<div class="ec-stats">
@@ -529,7 +561,7 @@ function renderEdificios() {
           ${st.ok>0?`<span class="ec-stat ok">${st.ok} OK</span>`:''}
           ${st.def>0?`<span class="ec-stat def">${st.def} def.</span>`:''}
           ${st.pend>0?`<span class="ec-stat pend">${st.pend} pend.</span>`:''}
-        </div>`;
+        </div>${contsHTML}`;
     return `<div class="edificio-card ${cls}" onclick="seleccionarEdificio(${num})">
       <div class="ec-num">${String(num).padStart(2,'0')}</div>
       <div class="ec-name">Edificio ${num}</div>
@@ -677,7 +709,11 @@ function renderPins() {
   const layer = document.getElementById('pinsLayer');
   const img = document.getElementById('planImg');
   layer.innerHTML = '';
-  (allPins[currentNivel]||[]).forEach(pin => {
+  poblarFiltroContratista();
+  const pinsToRender = filtroActivo
+    ? (allPins[currentNivel]||[]).filter(p => (p.contratistas||[]).includes(filtroActivo))
+    : (allPins[currentNivel]||[]);
+  pinsToRender.forEach(pin => {
     const el = document.createElement('div');
     el.className = 'pin';
     el.dataset.id = pin.id;
@@ -761,6 +797,17 @@ function openPinForm(pinOrId) {
       <div class="field"><label>Estado</label><select id="f_est" ${!canEdit?'disabled':''}>${stOpts}</select></div>
     </div>
     <div class="field">
+      <label>Contratistas involucrados</label>
+      <div id="f_contratistas_wrap" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0;border-bottom:1.5px solid var(--gray-line);">
+        ${CONTRATISTAS.map(c => {
+          const sel = (pin.contratistas||[]).includes(c);
+          const disabled = !canEdit ? 'pointer-events:none;opacity:0.6;' : '';
+          return `<span onclick="toggleContratista('${c}')" data-c="${c}"
+            style="cursor:pointer;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:600;border:1.5px solid ${sel?'var(--navy)':'var(--gray-line)'};background:${sel?'var(--navy)':'transparent'};color:${sel?'#fff':'var(--gray)'};transition:all 0.15s;${disabled}">${c}</span>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="field">
       <label>Ubicación / Referencia</label>
       <input type="text" id="f_ubi" ${!canEdit?'readonly':''} value="${pin.ubicacion}" placeholder="Ej. Eje B-3, Apto 101">
     </div>
@@ -770,12 +817,52 @@ function openPinForm(pinOrId) {
   highlightPin(pin.id);
 }
 
+function toggleContratista(nombre) {
+  if (!currentPin) return;
+  if (!currentPin.contratistas) currentPin.contratistas = [];
+  const idx = currentPin.contratistas.indexOf(nombre);
+  if (idx >= 0) currentPin.contratistas.splice(idx, 1);
+  else currentPin.contratistas.push(nombre);
+  // Update UI
+  document.querySelectorAll('[data-c]').forEach(el => {
+    const sel = currentPin.contratistas.includes(el.dataset.c);
+    el.style.background = sel ? 'var(--navy)' : 'transparent';
+    el.style.color = sel ? '#fff' : 'var(--gray)';
+    el.style.borderColor = sel ? 'var(--navy)' : 'var(--gray-line)';
+  });
+}
+
+let filtroActivo = '';
+function aplicarFiltro() {
+  filtroActivo = document.getElementById('filtroContratista').value;
+  renderPins();
+  updateCounter();
+}
+
+function poblarFiltroContratista() {
+  const sel = document.getElementById('filtroContratista');
+  if (!sel) return;
+  // Get contratistas that have pins in current nivel
+  const usados = new Set();
+  (allPins[currentNivel]||[]).forEach(p => (p.contratistas||[]).forEach(c => usados.add(c)));
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Todos los contratistas —</option>';
+  CONTRATISTAS.filter(c => usados.has(c)).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    if (c === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
 async function savePin() {
   if (!currentPin || currentRol==='visor') return;
   currentPin.descripcion = document.getElementById('f_desc')?.value||'';
   currentPin.categoria = document.getElementById('f_cat')?.value||'';
   currentPin.estado = document.getElementById('f_est')?.value||'Pendiente';
   currentPin.ubicacion = document.getElementById('f_ubi')?.value||'';
+  // contratistas already updated via toggleContratista()
+  if (!currentPin.contratistas) currentPin.contratistas = [];
   const btn = document.querySelector('.btn-save');
   if (btn) { btn.textContent='⏳ Guardando...'; btn.disabled=true; }
   await saveData();
@@ -835,6 +922,7 @@ function renderList() {
       <div class="pli-info">
         <div class="pli-num">PIN ${String(p.num).padStart(2,'0')} · ${p.estado} ${p.foto?'📷':''}</div>
         <div class="pli-desc">${p.descripcion||p.categoria||p.ubicacion||'Sin descripción'}</div>
+        ${(p.contratistas||[]).length>0?`<div style="font-size:9px;color:var(--navy);font-weight:600;">${(p.contratistas||[]).join(', ')}</div>`:''}
       </div>
       <div class="pli-dot" style="background:${color}"></div>
     </div>`;
@@ -1067,7 +1155,7 @@ function generateIconDataUrl(size) {
 function setupPWA() {
   const icon=generateIconDataUrl(192);
   document.getElementById('appleTouchIcon').href=icon;
-  const manifest={name:'FORBEY PRADOSPP',short_name:'FORBEY',description:'Levantamiento fotográfico georeferenciado – Prado Suites PP',start_url:window.location.href,display:'standalone',background_color:'#1B3A6B',theme_color:'#1B3A6B',orientation:'landscape',icons:[{src:icon,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},{src:generateIconDataUrl(512),sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+  const manifest={name:'FORBEY PRADOSPP',short_name:'FORBEY',description:'Levantamiento fotográfico georeferenciado – Prado Suites PP',start_url:window.location.href,display:'standalone',background_color:'#1B3A6B',theme_color:'#1B3A6B',orientation:'any',icons:[{src:icon,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},{src:generateIconDataUrl(512),sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
   document.getElementById('pwaManifest').href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:'application/json'}));
 }
 let deferredPrompt=null;
