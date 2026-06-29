@@ -941,30 +941,35 @@ async function exportarInformeCompleto(nombrePersonalizado) {
 
   // Render planos with pins
   const STATUS_COLORS_EXP={'OK':'#38A169','Observación':'#D69E2E','Defecto':'#E53E3E','Pendiente':'#718096','Corrección requerida':'#C05621'};
-  const planoPromises=NIVELES.filter(n=>(allPins[n]||[]).length>0).map(n=>new Promise(res=>{
-    const pins=allPins[n];
-    const img=new Image();
-    img.onload=()=>{
-      const c=document.createElement('canvas');
-      c.width=img.width;c.height=img.height;
-      const ctx=c.getContext('2d');
-      ctx.drawImage(img,0,0);
-      pins.forEach(p=>{
-        const x=(p.xPct/100)*img.width,y=(p.yPct/100)*img.height;
-        const color=STATUS_COLORS_EXP[p.estado]||'#718096';
-        const r=Math.max(18,img.width*0.018);
-        ctx.shadowColor='rgba(0,0,0,0.4)';ctx.shadowBlur=r*0.6;ctx.shadowOffsetY=r*0.3;
-        ctx.beginPath();ctx.arc(x,y-r,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
-        ctx.beginPath();ctx.moveTo(x-r*0.5,y-r*0.4);ctx.lineTo(x,y+r*0.6);ctx.lineTo(x+r*0.5,y-r*0.4);ctx.fillStyle=color;ctx.fill();
-        ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
-        ctx.beginPath();ctx.arc(x,y-r,r*0.55,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.92)';ctx.fill();
-        const fs=Math.max(12,r*0.75);ctx.font=`bold ${fs}px Arial`;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(String(p.num),x,y-r);
-      });
-      res({nivel:n,dataUrl:c.toDataURL('image/jpeg',0.92),pins});
-    };
-    img.src=PLANOS[n];
-  })));
+  function renderPlanoExport(n) {
+    return new Promise(function(res) {
+      var pins = allPins[n];
+      var img = new Image();
+      img.onload = function() {
+        var c = document.createElement('canvas');
+        c.width = img.width; c.height = img.height;
+        var ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        pins.forEach(function(p) {
+          var x = (p.xPct/100)*img.width, y = (p.yPct/100)*img.height;
+          var color = STATUS_COLORS_EXP[p.estado] || '#718096';
+          var r = Math.max(18, img.width*0.018);
+          ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=r*0.6; ctx.shadowOffsetY=r*0.3;
+          ctx.beginPath(); ctx.arc(x,y-r,r,0,Math.PI*2); ctx.fillStyle=color; ctx.fill();
+          ctx.beginPath(); ctx.moveTo(x-r*0.5,y-r*0.4); ctx.lineTo(x,y+r*0.6); ctx.lineTo(x+r*0.5,y-r*0.4); ctx.fillStyle=color; ctx.fill();
+          ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+          ctx.beginPath(); ctx.arc(x,y-r,r*0.55,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.fill();
+          var fs = Math.max(12,r*0.75);
+          ctx.font='bold '+fs+'px Arial'; ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(String(p.num),x,y-r);
+        });
+        res({nivel:n, dataUrl:c.toDataURL('image/jpeg',0.92), pins:pins});
+      };
+      img.src = PLANOS[n];
+    });
+  }
+  var nivelesConPins = NIVELES.filter(function(n){ return (allPins[n]||[]).length>0; });
+  var planoPromises = nivelesConPins.map(function(n){ return renderPlanoExport(n); });
 
   const planoResults=await Promise.all(planoPromises);
   const planoSection=planoResults.map(r=>{
