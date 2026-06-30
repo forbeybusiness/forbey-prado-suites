@@ -295,6 +295,9 @@ body.visor .canvas-wrap{cursor:default!important;}
       <select id="periodoSelector" onchange="cambiarPeriodo()" style="font-size:11px;padding:5px 10px;border:1.5px solid var(--navy);border-radius:4px;font-family:'Inter',sans-serif;color:var(--navy);background:#fff;font-weight:600;">
       </select>
       <span style="font-size:11px;color:var(--gray);" id="totalResumen"></span>
+      <button id="btnMigrar" onclick="migrarPinsSinPeriodo()" style="display:none;font-size:10px;padding:4px 10px;background:#E53E3E;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">
+        ⚠ Migrar pins
+      </button>
     </div>
   </div>
   <div class="edificios-grid" id="edificiosGrid"></div>
@@ -510,6 +513,11 @@ waitFirebase(() => {
       showScreen('screenEdificios');
       await cargarPeriodos();
       cargarEstadisticas();
+      // Show migration button for admin if needed
+      if (currentRol === 'admin') {
+        var btn = document.getElementById('btnMigrar');
+        if (btn) btn.style.display = 'inline-block';
+      }
       setupPWA();
       checkiOS();
       registerSW();
@@ -1253,6 +1261,30 @@ async function marcarCorregido(pinId) {
   await saveData();
   openPinForm(pin.id);
   renderPins();
+}
+
+// ── MIGRACIÓN PINS SIN PERÍODO ───────────────────────────────────────────────
+async function migrarPinsSinPeriodo() {
+  if (!window._firebaseReady) return;
+  var db = window._db;
+  var { collection, getDocs, doc, setDoc } = window._fsLib;
+  try {
+    var snap = await getDocs(collection(db,'pins'));
+    var count = 0;
+    for (var d of snap.docs) {
+      var p = d.data();
+      if (!p.periodo) {
+        await setDoc(doc(db,'pins',String(p.id)), {...p, periodo:'2026-06'});
+        count++;
+      }
+    }
+    alert('Migración completada: ' + count + ' pins actualizados a Junio 2026.');
+    cargarPeriodos();
+    cargarEstadisticas();
+    if (currentEdificio) startListener();
+  } catch(e) {
+    alert('Error en migración: ' + e.message);
+  }
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
