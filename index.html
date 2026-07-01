@@ -319,7 +319,7 @@ body.visor .canvas-wrap{cursor:default!important;}
 <!-- ═══ SCREEN: EDIFICIOS (Levantamiento) ═══ -->
 <div class="screen" id="screenEdificios">
   <div class="edificios-toolbar">
-    <button class="btn btn-outline" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+    <button class="btn btn-outline" onclick="irInicioDesdeEdificio()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
       <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       Inicio
     </button>
@@ -335,7 +335,7 @@ body.visor .canvas-wrap{cursor:default!important;}
 <!-- ═══ SCREEN: RECEPCIONES EDIFICIOS ═══ -->
 <div class="screen" id="screenRecepciones">
   <div class="edificios-toolbar">
-    <button class="btn btn-outline" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+    <button class="btn btn-outline" onclick="irInicioDesdeEdificio()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
       <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       Inicio
     </button>
@@ -1285,7 +1285,7 @@ function volverEdificios() {
   if (unsubscribeListener) { unsubscribeListener(); unsubscribeListener=null; }
   currentEdificio = null;
   showScreen('screenEdificios');
-  document.getElementById('breadcrumb').innerHTML = '<span class="crumb" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="cursor:pointer;opacity:0.7;">Inicio</span><span class="sep">›</span><span class="current">Levantamiento</span>';
+  document.getElementById('breadcrumb').innerHTML = '<span class="crumb" onclick="irInicioDesdeEdificio()" style="cursor:pointer;opacity:0.7;">Inicio</span><span class="sep">›</span><span class="current">Levantamiento</span>';
   cargarPeriodos();
   cargarEstadisticas();
 }
@@ -1933,6 +1933,19 @@ async function marcarCorregido(pinId) {
 }
 
 // ── NAVEGACIÓN HOME ──────────────────────────────────────────────────────────
+function irInicioDesdeRecepciones() {
+  currentEdificioRec = null;
+  showScreen('screenHome');
+  document.getElementById('breadcrumb').innerHTML = '<span class="current">Inicio</span>';
+}
+
+function irInicioDesdeEdificio() {
+  if (unsubscribeListener) { unsubscribeListener(); unsubscribeListener=null; }
+  currentEdificio = null;
+  showScreen('screenHome');
+  document.getElementById('breadcrumb').innerHTML = '<span class="current">Inicio</span>';
+}
+
 function irALevantamiento() {
   showScreen('screenEdificios');
   document.getElementById('breadcrumb').innerHTML = '<span class="current">Edificios</span>';
