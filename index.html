@@ -2218,178 +2218,179 @@ function renderActa(partida) {
 
 function buildChecklist(partida, canEdit) {
   var html = '';
-  var scope = partida.scope;
   var items = actaData.items || {};
 
-  function itemRow(key, label, indent) {
-    var val = items[key] || 'pendiente';
-    var ind = indent ? 'margin-left:20px;' : '';
-    var opts = [
-      ['pendiente','⚪','#718096'],
-      ['ok','✅','#38A169'],
-      ['obs','⚠️','#D69E2E'],
-      ['no_aplica','N/A','#a0aec0']
-    ].map(function(o) {
-      return '<option value="'+o[0]+'"'+(val===o[0]?' selected':'')+'>'+o[1]+' '+o[0].charAt(0).toUpperCase()+o[0].slice(1).replace('_',' ')+'</option>';
-    }).join('');
-    var selectHTML = canEdit ?
-      '<select onchange="updateItem(''+key+'',this.value)" style="font-size:10px;border:none;border-bottom:1px solid var(--gray-line);background:transparent;outline:none;padding:2px 4px;font-family:'Inter',sans-serif;">'+opts+'</select>' :
-      '<span style="font-size:11px;">'+({'pendiente':'⚪','ok':'✅','obs':'⚠️','no_aplica':'N/A'}[val]||'⚪')+'</span>';
-    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid #f0f0f0;'+ind+'">'+
-      '<div style="flex:1;font-size:11px;color:var(--navy);">'+label+'</div>'+
-      selectHTML+
-    '</div>';
+  function getVal(key) { return items[key] || 'pendiente'; }
+
+  function itemRow(key, label) {
+    var val = getVal(key);
+    var icons = {pendiente:'⚪ Pendiente', ok:'✅ OK', obs:'⚠️ Observación', no_aplica:'N/A'};
+    var selectEl;
+    if (canEdit) {
+      selectEl = '<select onchange="updateItem('' + key + '',this.value)" style="font-size:10px;border:none;border-bottom:1px solid #CBD5E0;background:transparent;outline:none;padding:2px 4px;min-width:110px;">';
+      ['pendiente','ok','obs','no_aplica'].forEach(function(o) {
+        selectEl += '<option value="' + o + '"' + (val===o?' selected':'') + '>' + icons[o] + '</option>';
+      });
+      selectEl += '</select>';
+    } else {
+      selectEl = '<span style="font-size:11px;">' + (icons[val]||'⚪') + '</span>';
+    }
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid #f0f0f0;">' +
+      '<div style="flex:1;font-size:11px;color:#1B3A6B;">' + label + '</div>' +
+      selectEl + '</div>';
   }
 
-  function sectionHeader(title, color) {
-    color = color || 'var(--navy)';
-    return '<div style="background:'+color+';color:#fff;padding:6px 10px;border-radius:4px;margin:10px 0 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;">'+title+'</div>';
+  function obsRow(key, placeholder) {
+    var val = items[key] || '';
+    if (canEdit) {
+      return '<div style="margin:4px 0;"><textarea onchange="updateItem('' + key + '',this.value)" placeholder="' + placeholder + '" style="width:100%;font-size:11px;border:1px solid #CBD5E0;border-radius:4px;padding:4px;resize:vertical;min-height:36px;">' + val + '</textarea></div>';
+    }
+    return val ? '<div style="font-size:10px;color:#4A5568;font-style:italic;padding:4px 0;">' + val + '</div>' : '';
   }
 
-  if (scope === 'exterior' || scope === 'por_edificio') {
-    // Global items
-    var itemList = partida.items || [];
-    itemList.forEach(function(item) {
-      var key = 'general_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase();
-      html += itemRow(key, item, false);
+  function secHeader(title, color) {
+    return '<div style="background:' + (color||'#1B3A6B') + ';color:#fff;padding:6px 10px;border-radius:4px;margin:10px 0 6px;font-size:11px;font-weight:700;">' + title + '</div>';
+  }
+
+  var scope = partida.scope;
+  var NIVELES_OBRA = ['N1','N2','N3','N4'];
+  var PH_UNITS = ['PH01','PH02','PH03','PH04'];
+
+  if (scope === 'exterior') {
+    (partida.items||[]).forEach(function(item) {
+      html += itemRow('gen_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
     });
-    // Sub-items for herreria
+  } else if (scope === 'por_edificio') {
     if (partida.id === 'herreria') {
-      html += sectionHeader('Barandas Escalera General','#1B3A6B');
+      html += secHeader('Barandas Escalera General');
       (partida.items_barandas_escalera||[]).forEach(function(item) {
-        html += itemRow('baranda_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('bar_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
-      html += sectionHeader('Louvers Escalera','#2558A8');
+      html += secHeader('Louvers Escalera','#2558A8');
       (partida.items_louvers_escalera||[]).forEach(function(item) {
-        html += itemRow('louver_esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('lesc_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
-      html += sectionHeader('Louvers Fachada','#2558A8');
+      html += secHeader('Louvers Fachada','#2558A8');
       (partida.items_louvers_fachada||[]).forEach(function(item) {
-        html += itemRow('louver_fach_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('lfach_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
-      html += sectionHeader('Escaleras Internas PH (N4→N5)','#6B46C1');
+      html += secHeader('Escaleras Internas PH','#6B46C1');
       (partida.items_escaleras_ph||[]).forEach(function(item) {
-        html += itemRow('esc_ph_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('eph_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
-    }
-    if (partida.id === 'ascensores') {
+    } else if (partida.id === 'ascensores') {
       (partida.items||[]).forEach(function(item) {
-        html += itemRow('asc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('asc_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
     }
-  } else if (scope === 'mixto' && partida.id === 'denglas') {
-    html += sectionHeader('Cajetines Exteriores — Balcones y Fachadas','#1B3A6B');
+  } else if (partida.id === 'denglas') {
+    html += secHeader('Cajetines Exteriores — Balcones y Fachadas');
     (partida.items_cajetines||[]).forEach(function(item) {
-      html += itemRow('cajext_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      html += itemRow('caj_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
     });
-    ['N1','N2','N3','N4'].forEach(function(n) {
-      html += sectionHeader('Pasillos Generales — '+n,'#2558A8');
+    NIVELES_OBRA.forEach(function(n) {
+      html += secHeader('Pasillos Generales — ' + n, '#2558A8');
       (partida.items_pasillos_nivel||[]).forEach(function(item) {
-        html += itemRow('pasillo_'+n+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('pas_'+n+'_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
     });
-    html += sectionHeader('Caja de Ascensores','#718096');
+    html += secHeader('Caja de Ascensores','#718096');
     (partida.items_ascensor||[]).forEach(function(item) {
-      html += itemRow('asc_caja_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      html += itemRow('ascbox_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
     });
-    html += sectionHeader('Muro Denglas Cocina — Solo N4 (Aptos 401-404)','#D69E2E');
+    html += secHeader('Muro Denglas Cocina — Solo N4','#D69E2E');
     (partida.items_cocina_n4||[]).forEach(function(item) {
-      html += itemRow('den_coc_n4_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      html += itemRow('den4_' + item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
     });
-  } else if (scope === 'interior_exterior' && partida.id === 'pintura') {
-    // Interior by apto
-    ['N1','N2','N3','N4'].forEach(function(n) {
+  } else if (partida.id === 'pintura') {
+    NIVELES_OBRA.forEach(function(n) {
       ['01','02','03','04'].forEach(function(a) {
-        var label = a==='01'||a==='02' ? 'Apto '+a+' (3 hab)' : 'Apto '+a+' (2 hab)';
-        html += sectionHeader(n+' — '+label+' — Interior','#1B3A6B');
+        var label = (a==='01'||a==='02') ? 'Apto '+a+' (3 hab)' : 'Apto '+a+' (2 hab)';
+        html += secHeader(n + ' — ' + label + ' — Interior');
         (partida.items_interior_apto||[]).forEach(function(item) {
-          html += itemRow('int_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          html += itemRow('int_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
         });
-        // Obs per apto
-        html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_int_'+n+'_'+a+'',this.value)" placeholder="Observación apto '+a+' '+n+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_int_'+n+'_'+a]||'')+'</textarea></div>';
+        html += obsRow('obs_int_'+n+'_'+a, 'Observación ' + label + ' ' + n);
       });
     });
-    // PH interior
-    html += sectionHeader('PH — Interior (Family Room, Baño, Techo)','#6B46C1');
-    ['PH01','PH02','PH03','PH04'].forEach(function(ph) {
-      html += sectionHeader(ph,'#8B5CF6');
+    html += secHeader('PH — Interior','#6B46C1');
+    PH_UNITS.forEach(function(ph) {
+      html += secHeader(ph,'#8B5CF6');
       (partida.items_interior_ph||[]).forEach(function(item) {
-        html += itemRow('int_ph_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('int_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
     });
-    // Exterior global
-    html += sectionHeader('Exterior — Fachadas Generales','#1B3A6B');
+    html += secHeader('Exterior — Fachadas');
     (partida.items_exterior||[]).forEach(function(item) {
-      html += itemRow('ext_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      html += itemRow('ext_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
     });
   } else {
-    // por_apto scope (most partidas)
-    ['N1','N2','N3','N4'].forEach(function(n) {
+    // por_apto (most partidas)
+    NIVELES_OBRA.forEach(function(n) {
       ['01','02','03','04'].forEach(function(a) {
         var tipo = (a==='01'||a==='02') ? '3hab' : '2hab';
         var label = tipo==='3hab' ? 'Apto '+a+' (3 hab)' : 'Apto '+a+' (2 hab)';
-        var itemList = partida['items_'+tipo] || partida.items_apto || partida['items_bano_principal'] ? null : [];
 
-        // Special handling for aparatos_bano
-        if (partida.id === 'aparatos_bano') {
-          html += sectionHeader(n+' — '+label+' — Baño Principal','#1B3A6B');
-          (partida.items_bano_principal||[]).forEach(function(item) {
-            html += itemRow('bp_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
-          });
-          html += sectionHeader(n+' — '+label+' — Baño Social','#2558A8');
-          (partida.items_bano_social||[]).forEach(function(item) {
-            html += itemRow('bs_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
-          });
-        } else if (partida.id === 'formaleta') {
-          html += sectionHeader(n+' — Nivel General','#1B3A6B');
-          if (a === '01') { // Show nivel items only once
+        if (partida.id === 'formaleta') {
+          if (a === '01') {
+            html += secHeader(n + ' — General');
             (partida.items_generales_nivel||[]).forEach(function(item) {
-              html += itemRow('niv_'+n+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+              html += itemRow('niv_'+n+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
             });
           }
-          html += sectionHeader(n+' — '+label,'#2558A8');
+          html += secHeader(n + ' — ' + label, '#2558A8');
           (partida.items_por_apto||[]).forEach(function(item) {
-            html += itemRow('apto_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+            html += itemRow('apt_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
           });
           if (n==='N1' && a==='01') {
-            html += sectionHeader('Escalera General','#6B46C1');
+            html += secHeader('Escalera General','#6B46C1');
             (partida.items_escalera||[]).forEach(function(item) {
-              html += itemRow('esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+              html += itemRow('esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
             });
           }
+        } else if (partida.id === 'aparatos_bano') {
+          html += secHeader(n+' — '+label+' — Baño Principal');
+          (partida.items_bano_principal||[]).forEach(function(item) {
+            html += itemRow('bp_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
+          });
+          html += secHeader(n+' — '+label+' — Baño Social','#2558A8');
+          (partida.items_bano_social||[]).forEach(function(item) {
+            html += itemRow('bs_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
+          });
         } else {
-          var items_to_show = partida['items_'+tipo] || partida.items_apto || [];
-          if (items_to_show.length > 0) {
-            html += sectionHeader(n+' — '+label,'#1B3A6B');
-            items_to_show.forEach(function(item) {
-              html += itemRow(n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          var itemList = partida['items_'+tipo] || partida.items_apto || [];
+          if (itemList.length > 0) {
+            html += secHeader(n+' — '+label);
+            itemList.forEach(function(item) {
+              html += itemRow(n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
             });
-            html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_'+n+'_'+a+'',this.value)" placeholder="Observación '+label+' '+n+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_'+n+'_'+a]||'')+'</textarea></div>';
+            html += obsRow('obs_'+n+'_'+a, 'Observación '+label+' '+n);
           }
         }
       });
     });
 
-    // PH section
+    // PH
     if (partida.aplica_ph && partida.items_ph && partida.items_ph.length > 0) {
-      ['PH01','PH02','PH03','PH04'].forEach(function(ph) {
-        html += sectionHeader(ph+' (Penthouse — continuación N4)','#6B46C1');
+      PH_UNITS.forEach(function(ph) {
+        html += secHeader(ph+' — Penthouse','#6B46C1');
         partida.items_ph.forEach(function(item) {
-          html += itemRow('ph_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          html += itemRow('ph_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
         });
-        html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_ph_'+ph+'',this.value)" placeholder="Observación '+ph+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_ph_'+ph]||'')+'</textarea></div>';
+        html += obsRow('obs_'+ph, 'Observación '+ph);
       });
     }
 
-    // Pisos escalera general
+    // Pisos escalera
     if (partida.id === 'pisos' && partida.items_escalera) {
-      html += sectionHeader('Escalera General','#6B46C1');
+      html += secHeader('Escalera General','#6B46C1');
       partida.items_escalera.forEach(function(item) {
-        html += itemRow('pisos_esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        html += itemRow('pisos_esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item);
       });
     }
   }
-  return html || '<div style="color:var(--gray);font-size:11px;font-style:italic;">Sin items de verificación definidos.</div>';
+
+  return html || '<div style="color:#4A5568;font-size:11px;font-style:italic;padding:8px;">Sin items definidos.</div>';
 }
 
 function updateItem(key, value) {
