@@ -2128,83 +2128,92 @@ async function abrirActa(partidaId) {
 
 function renderActa(partida) {
   var canEdit = currentRol === 'admin' || currentRol === 'colaborador';
-  var ro = canEdit ? '' : 'disabled readonly';
-  var roSel = canEdit ? '' : 'disabled';
 
-  var contOpts = CONTRATISTAS_LIST.map(function(c) {
-    return '<option value="'+c+'"'+(actaData.contratista===c?' selected':'')+'>'+c+'</option>';
-  }).join('');
+  // Contratista options
+  var contOpts = '<option value="">— Seleccionar —</option>';
+  CONTRATISTAS_LIST.forEach(function(c) {
+    contOpts += '<option value="' + c + '"' + (actaData.contratista === c ? ' selected' : '') + '>' + c + '</option>';
+  });
 
-  var estadoOpts = [
-    ['pendiente','⚪ Pendiente'],
-    ['en_revision','🔵 En revisión'],
-    ['conforme','✅ Recibido conforme'],
-    ['con_obs','⚠️ Con observaciones']
-  ].map(function(s) {
-    return '<option value="'+s[0]+'"'+(actaData.estado===s[0]?' selected':'')+'>'+s[1]+'</option>';
-  }).join('');
+  // Estado options
+  var estadoMap = [
+    ['pendiente', '⚪ Pendiente'],
+    ['en_revision', '🔵 En revisión'],
+    ['conforme', '✅ Recibido conforme'],
+    ['con_obs', '⚠️ Con observaciones']
+  ];
+  var estadoOpts = '';
+  estadoMap.forEach(function(s) {
+    estadoOpts += '<option value="' + s[0] + '"' + (actaData.estado === s[0] ? ' selected' : '') + '>' + s[1] + '</option>';
+  });
 
-  // Build checklist based on partida scope
+  // Build checklist
   var checklistHTML = buildChecklist(partida, canEdit);
 
   // Fotos section
   var fotoItems = [];
   (actaData.fotos||[]).forEach(function(f, idx) {
-    var delBtnStr = canEdit ? ("<button onclick=\"eliminarFotoActa(" + idx + ")\" style=\"position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;\">x</button>") : "";
-    fotoItems.push("<div style=\"position:relative;display:inline-block;\"><img src=\"" + f + "\" style=\"width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;\" onclick=\"openLightboxSrc(this.src)\">" + delBtnStr + "</div>");
+    var delBtnStr = canEdit ? ('<button onclick="eliminarFotoActa(' + idx + ')" style="position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;">×</button>') : '';
+    fotoItems.push('<div style="position:relative;display:inline-block;"><img src="' + f + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;" onclick="openLightboxSrc(this.src)">' + delBtnStr + '</div>');
   });
   if (canEdit) {
-    fotoItems.push("<div onclick=\"triggerFotoActa()\" style=\"width:80px;height:80px;border:2px dashed #CBD5E0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#718096;\">+</div>");
+    fotoItems.push('<div onclick="triggerFotoActa()" style="width:80px;height:80px;border:2px dashed #CBD5E0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#718096;" title="Agregar foto">+</div>');
   }
-  var fotosHTML = "<div style=\"display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;\">" + fotoItems.join("") + "</div>";
+  var fotosHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">' + fotoItems.join('') + '</div>';
 
   // Firma section
   var firmaHTML;
   if (actaData.firmado) {
-    var deshBtn = canEdit ? "<button onclick=\"deshacarFirma()\" style=\"margin-left:auto;font-size:10px;padding:4px 10px;background:transparent;color:#E53E3E;border:1px solid #E53E3E;border-radius:4px;cursor:pointer;\">Deshacer</button>" : "";
-    firmaHTML = "<div style=\"background:#F0FFF4;border:1.5px solid #38A169;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;\"><span style=\"font-size:20px;\">✅</span><div><div style=\"font-size:12px;font-weight:700;color:#38A169;\">Firmado digitalmente</div><div style=\"font-size:10px;color:#4A5568;\">" + (actaData.firmado_por||"") + " · " + (actaData.firmado_fecha||"") + "</div></div>" + deshBtn + "</div>";
+    var deshBtn = canEdit ? '<button onclick="deshacarFirma()" style="margin-left:auto;font-size:10px;padding:4px 10px;background:transparent;color:#E53E3E;border:1px solid #E53E3E;border-radius:4px;cursor:pointer;">Deshacer</button>' : '';
+    firmaHTML = '<div style="background:#F0FFF4;border:1.5px solid #38A169;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">' +
+      '<span style="font-size:20px;">✅</span>' +
+      '<div><div style="font-size:12px;font-weight:700;color:#38A169;">Firmado digitalmente</div>' +
+      '<div style="font-size:10px;color:#4A5568;">' + (actaData.firmado_por||'') + ' · ' + (actaData.firmado_fecha||'') + '</div></div>' +
+      deshBtn + '</div>';
   } else if (canEdit) {
-    firmaHTML = "<button onclick=\"firmarActa()\" style=\"width:100%;padding:12px;background:#1B3A6B;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;\">✍ Firmar digitalmente como Ing. responsable</button>";
+    firmaHTML = '<button onclick="firmarActa()" style="width:100%;padding:12px;background:#1B3A6B;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;">✍ Firmar digitalmente como Ing. responsable</button>';
   } else {
-    firmaHTML = "<div style=\"color:#4A5568;font-size:11px;font-style:italic;\">Pendiente de firma del ingeniero responsable</div>";
+    firmaHTML = '<div style="color:#4A5568;font-size:11px;font-style:italic;">Pendiente de firma del ingeniero responsable</div>';
   }
 
-  document.getElementById('actaContent').innerHTML =
-    // Header info
-    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
-      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:12px;">Información General del Acta</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
-        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Contratista responsable</label>'+
-          '<select id="acta_contratista" '+roSel+' style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;">'+
-          '<option value="">— Seleccionar —</option>'+contOpts+'</select></div>'+
-        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Estado del acta</label>'+
-          '<select id="acta_estado" '+roSel+' style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;">'+estadoOpts+'</select></div>'+
-        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Ingeniero inspector</label>'+
-          '<input type="text" id="acta_ingeniero" '+ro+' value="'+(actaData.ingeniero||'')+'" placeholder="Nombre completo" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;"></div>'+
-        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Fecha de inspección</label>'+
-          '<input type="date" id="acta_fecha" '+ro+' value="'+(actaData.fecha_inspeccion||'')+'" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;"></div>'+
-      '</div>'+
-      '<div style="margin-top:10px;"><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Observaciones generales</label>'+
-        '<textarea id="acta_obs" '+ro+' placeholder="Observaciones generales del acta…" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;min-height:50px;resize:vertical;">'+(actaData.observaciones_generales||'')+'</textarea></div>'+
-    '</div>'+
+  // Build form fields using DOM to avoid quote issues
+  var cont = document.getElementById('actaContent');
+  if (!cont) return;
 
-    // Checklist
-    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
-      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:12px;">Lista de Verificación</div>'+
-      checklistHTML+
-    '</div>'+
+  // Header card
+  var hCard = document.createElement('div');
+  hCard.style.cssText = 'background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #CBD5E0;';
+  hCard.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B3A6B;margin-bottom:12px;">Información General del Acta</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">' +
+      '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B3A6B;">Contratista responsable</label>' +
+        '<select id="acta_contratista" ' + (canEdit?'':'disabled') + ' style="width:100%;border:none;border-bottom:1.5px solid #CBD5E0;padding:4px 2px;font-size:12px;background:transparent;outline:none;margin-top:2px;">' + contOpts + '</select></div>' +
+      '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B3A6B;">Estado del acta</label>' +
+        '<select id="acta_estado" ' + (canEdit?'':'disabled') + ' style="width:100%;border:none;border-bottom:1.5px solid #CBD5E0;padding:4px 2px;font-size:12px;background:transparent;outline:none;margin-top:2px;">' + estadoOpts + '</select></div>' +
+      '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B3A6B;">Ingeniero inspector</label>' +
+        '<input type="text" id="acta_ingeniero" ' + (canEdit?'':'readonly') + ' value="' + (actaData.ingeniero||'') + '" placeholder="Nombre completo" style="width:100%;border:none;border-bottom:1.5px solid #CBD5E0;padding:4px 2px;font-size:12px;background:transparent;outline:none;margin-top:2px;"></div>' +
+      '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B3A6B;">Fecha de inspección</label>' +
+        '<input type="date" id="acta_fecha" ' + (canEdit?'':'readonly') + ' value="' + (actaData.fecha_inspeccion||'') + '" style="width:100%;border:none;border-bottom:1.5px solid #CBD5E0;padding:4px 2px;font-size:12px;background:transparent;outline:none;margin-top:2px;"></div>' +
+    '</div>' +
+    '<div style="margin-top:10px;"><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1B3A6B;">Observaciones generales</label>' +
+      '<textarea id="acta_obs" ' + (canEdit?'':'readonly') + ' placeholder="Observaciones generales…" style="width:100%;border:none;border-bottom:1.5px solid #CBD5E0;padding:4px 2px;font-size:12px;background:transparent;outline:none;margin-top:2px;min-height:50px;resize:vertical;">' + (actaData.observaciones_generales||'') + '</textarea></div>';
 
-    // Fotos
-    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
-      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;">Fotografías de Evidencia</div>'+
-      fotosHTML+
-    '</div>'+
+  var clCard = document.createElement('div');
+  clCard.style.cssText = 'background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #CBD5E0;';
+  clCard.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B3A6B;margin-bottom:12px;">Lista de Verificación</div>' + checklistHTML;
 
-    // Firma
-    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
-      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;">Firma Digital</div>'+
-      firmaHTML+
-    '</div>';
+  var fCard = document.createElement('div');
+  fCard.style.cssText = 'background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #CBD5E0;';
+  fCard.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B3A6B;margin-bottom:8px;">Fotografías de Evidencia</div>' + fotosHTML;
+
+  var sigCard = document.createElement('div');
+  sigCard.style.cssText = 'background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid #CBD5E0;';
+  sigCard.innerHTML = '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#1B3A6B;margin-bottom:8px;">Firma Digital</div>' + firmaHTML;
+
+  cont.innerHTML = '';
+  cont.appendChild(hCard);
+  cont.appendChild(clCard);
+  cont.appendChild(fCard);
+  cont.appendChild(sigCard);
 }
 
 function buildChecklist(partida, canEdit) {
