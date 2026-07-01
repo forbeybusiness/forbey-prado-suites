@@ -2148,22 +2148,26 @@ function renderActa(partida) {
   var checklistHTML = buildChecklist(partida, canEdit);
 
   // Fotos section
-  var fotosHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">' +
-    (actaData.fotos||[]).map(function(f, i) {
-      return '<div style="position:relative;"><img src="'+f+'" style="width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;" onclick="openLightboxSrc(''+f+'')">'+
-        (canEdit?'<button onclick="eliminarFotoActa('+i+')" style="position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;">×</button>':'')+'</div>';
-    }).join('') +
-    (canEdit?'<div onclick="triggerFotoActa()" style="width:80px;height:80px;border:2px dashed var(--gray-line);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray);font-size:22px;" title="Agregar foto">+</div>':'') +
-  '</div>';
+  var fotoItems = [];
+  (actaData.fotos||[]).forEach(function(f, idx) {
+    var delBtnStr = canEdit ? ("<button onclick=\"eliminarFotoActa(" + idx + ")\" style=\"position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;\">x</button>") : "";
+    fotoItems.push("<div style=\"position:relative;display:inline-block;\"><img src=\"" + f + "\" style=\"width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;\" onclick=\"openLightboxSrc(this.src)\">" + delBtnStr + "</div>");
+  });
+  if (canEdit) {
+    fotoItems.push("<div onclick=\"triggerFotoActa()\" style=\"width:80px;height:80px;border:2px dashed #CBD5E0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:#718096;\">+</div>");
+  }
+  var fotosHTML = "<div style=\"display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;\">" + fotoItems.join("") + "</div>";
 
   // Firma section
-  var firmaHTML = actaData.firmado ?
-    '<div style="background:#F0FFF4;border:1.5px solid #38A169;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'+
-      '<span style="font-size:20px;">✅</span>'+
-      '<div><div style="font-size:12px;font-weight:700;color:#38A169;">Firmado digitalmente</div>'+
-      '<div style="font-size:10px;color:var(--gray);">'+actaData.firmado_por+' · '+actaData.firmado_fecha+'</div></div>'+
-      (canEdit?'<button onclick="deshacarFirma()" style="margin-left:auto;font-size:10px;padding:4px 10px;background:transparent;color:#E53E3E;border:1px solid #E53E3E;border-radius:4px;cursor:pointer;">Deshacer</button>':'')+'</div>' :
-    (canEdit?'<button onclick="firmarActa()" style="width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;">✍ Firmar digitalmente como Ing. responsable</button>':'<div style="color:var(--gray);font-size:11px;font-style:italic;">Pendiente de firma del ingeniero responsable</div>');
+  var firmaHTML;
+  if (actaData.firmado) {
+    var deshBtn = canEdit ? "<button onclick=\"deshacarFirma()\" style=\"margin-left:auto;font-size:10px;padding:4px 10px;background:transparent;color:#E53E3E;border:1px solid #E53E3E;border-radius:4px;cursor:pointer;\">Deshacer</button>" : "";
+    firmaHTML = "<div style=\"background:#F0FFF4;border:1.5px solid #38A169;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;\"><span style=\"font-size:20px;\">✅</span><div><div style=\"font-size:12px;font-weight:700;color:#38A169;\">Firmado digitalmente</div><div style=\"font-size:10px;color:#4A5568;\">" + (actaData.firmado_por||"") + " · " + (actaData.firmado_fecha||"") + "</div></div>" + deshBtn + "</div>";
+  } else if (canEdit) {
+    firmaHTML = "<button onclick=\"firmarActa()\" style=\"width:100%;padding:12px;background:#1B3A6B;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;\">✍ Firmar digitalmente como Ing. responsable</button>";
+  } else {
+    firmaHTML = "<div style=\"color:#4A5568;font-size:11px;font-style:italic;\">Pendiente de firma del ingeniero responsable</div>";
+  }
 
   document.getElementById('actaContent').innerHTML =
     // Header info
