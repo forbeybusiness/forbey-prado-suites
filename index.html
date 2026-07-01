@@ -231,6 +231,10 @@ body.visor .canvas-wrap{cursor:default!important;}
 .periodo-archivo{background:var(--gray-light);color:var(--gray);font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;}
 .corregido-btn{width:100%;padding:9px;background:#2B6CB0;color:#fff;border:none;border-radius:5px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .corregido-btn:hover{background:#2C5282;}
+#screenHome{background:#F4F6FA;}
+#screenRecepciones{background:#F4F6FA;}
+#screenPartidas{background:#F4F6FA;overflow:hidden;}
+#screenActa{background:#F4F6FA;overflow:hidden;}
 .corregido-badge{display:inline-flex;align-items:center;gap:4px;background:#EBF8FF;color:#2B6CB0;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;border:1.5px solid #2B6CB0;}
 @media print{
   .plano-toolbar,.side-panel,.app-header,.nivel-tabs{display:none!important;}
@@ -287,18 +291,90 @@ body.visor .canvas-wrap{cursor:default!important;}
   </div>
 </header>
 
-<!-- ═══ SCREEN: EDIFICIOS ═══ -->
+═══ SCREEN: HOME ═══ -->
+<div class="screen" id="screenHome">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;gap:24px;background:#F4F6FA;">
+    <div style="text-align:center;margin-bottom:4px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;color:var(--navy);text-transform:uppercase;opacity:0.5;">Prado Suites Puerto Plata</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;color:var(--navy);text-transform:uppercase;">Selecciona un módulo</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:580px;">
+      <div onclick="irALevantamiento()" style="background:#fff;border:2px solid var(--gray-line);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--navy)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--gray-line)';this.style.transform='translateY(0)'">
+        <div style="font-size:40px;margin-bottom:8px;">📍</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--navy);letter-spacing:1px;text-transform:uppercase;">Levantamiento</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5;">Planos interactivos con pins georeferenciados y fotos de campo</div>
+        <div style="margin-top:12px;background:var(--navy);color:#fff;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;">Abrir →</div>
+      </div>
+      <div onclick="irARecepciones()" style="background:#fff;border:2px solid var(--gray-line);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='#38A169';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--gray-line)';this.style.transform='translateY(0)'">
+        <div style="font-size:40px;margin-bottom:8px;">✅</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#38A169;letter-spacing:1px;text-transform:uppercase;">Recepciones</div>
+        <div style="font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5;">Actas de recepción de trabajos por partida y edificio</div>
+        <div style="margin-top:12px;background:#38A169;color:#fff;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;">Abrir →</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--gray-line);" id="homeUserInfo"></div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: EDIFICIOS (Levantamiento) ═══ -->
 <div class="screen" id="screenEdificios">
   <div class="edificios-toolbar">
-    <span class="toolbar-title">Selecciona un edificio</span>
+    <button class="btn btn-outline" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Inicio
+    </button>
+    <span class="toolbar-title">Levantamiento — Edificios</span>
     <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-      <select id="periodoSelector" onchange="cambiarPeriodo()" style="font-size:11px;padding:5px 10px;border:1.5px solid var(--navy);border-radius:4px;font-family:'Inter',sans-serif;color:var(--navy);background:#fff;font-weight:600;">
-      </select>
+      <select id="periodoSelector" onchange="cambiarPeriodo()" style="font-size:11px;padding:5px 10px;border:1.5px solid var(--navy);border-radius:4px;font-family:'Inter',sans-serif;color:var(--navy);background:#fff;font-weight:600;"></select>
       <span style="font-size:11px;color:var(--gray);" id="totalResumen"></span>
-
     </div>
   </div>
   <div class="edificios-grid" id="edificiosGrid"></div>
+</div>
+
+<!-- ═══ SCREEN: RECEPCIONES EDIFICIOS ═══ -->
+<div class="screen" id="screenRecepciones">
+  <div class="edificios-toolbar">
+    <button class="btn btn-outline" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Inicio
+    </button>
+    <span class="toolbar-title">Recepciones — Edificios</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+      <select id="periodoSelectorRec" onchange="cambiarPeriodoRec()" style="font-size:11px;padding:5px 10px;border:1.5px solid #38A169;border-radius:4px;font-family:'Inter',sans-serif;color:#38A169;background:#fff;font-weight:600;"></select>
+      <span style="font-size:11px;color:var(--gray);" id="totalResumenRec"></span>
+    </div>
+  </div>
+  <div class="edificios-grid" id="edificiosGridRec"></div>
+</div>
+
+<!-- ═══ SCREEN: PARTIDAS ═══ -->
+<div class="screen" id="screenPartidas">
+  <div class="edificios-toolbar">
+    <button class="btn btn-outline" onclick="volverARecepciones()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Edificios
+    </button>
+    <span class="toolbar-title" id="partidasTitle">Partidas</span>
+    <span style="font-size:11px;color:var(--gray);margin-left:auto;" id="partidasPeriodoBadge"></span>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px;background:#F4F6FA;" id="partidasList"></div>
+</div>
+
+<!-- ═══ SCREEN: ACTA ═══ -->
+<div class="screen" id="screenActa">
+  <div class="edificios-toolbar" style="flex-wrap:wrap;gap:6px;">
+    <button class="btn btn-outline" onclick="volverAPartidas()" style="flex-shrink:0;font-size:11px;padding:5px 10px;">
+      <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      Partidas
+    </button>
+    <span class="toolbar-title" id="actaTitle" style="font-size:13px;">Acta</span>
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="btn btn-accent" id="btnGuardarActa" onclick="guardarActa()">💾 Guardar</button>
+      <button class="btn btn-outline" onclick="exportarActaPDF()">📄 PDF</button>
+    </div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px;background:#F4F6FA;" id="actaContent"></div>
 </div>
 
 <!-- ═══ SCREEN: PLANO ═══ -->
@@ -436,6 +512,597 @@ const EDIFICIOS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23
 const NIVELES = ['N1', 'N2', 'N3', 'N4', 'N5'];
 const STATUS_COLORS = {'OK': '#38A169', 'Observación': '#D69E2E', 'Defecto': '#E53E3E', 'Pendiente': '#718096', 'Corrección requerida': '#C05621', 'Corregido': '#2B6CB0'};
 const CONTRATISTAS = ['SEMS', 'NESA', 'ABREU & ASOC', 'RJJ', 'GETOP', 'JOVECA', 'TEPINTEC', 'GLASSART', 'SINERGAMA', 'NOVOINSTALL', 'TALLERES BELLO', 'JARDINERIA ANAMARIA', 'REGADIO SOCRATES', 'MAESTRO VICTOR', 'MAESTRO ANGEL', 'MAESTRO ROBERT', 'MAESTRO LUIS'];
+const PARTIDAS_DEF = [
+  {
+    "id": "formaleta",
+    "num": 1,
+    "nombre": "Formaleta",
+    "contratista_default": "",
+    "scope": "nivel_y_apto",
+    "items_generales_nivel": [
+      "Muros vaciados — alineación y plomada",
+      "Vigas — dimensiones y posición",
+      "Losa — espesor y nivelación",
+      "Juntas de construcción — sellado correcto",
+      "Limpieza post-vaciado",
+      "Resistencia del concreto (f'c) — resultado de cilindros"
+    ],
+    "items_por_apto": [
+      "Muros internos — alineación y plomada",
+      "Dinteles — posición y dimensión"
+    ],
+    "items_escalera": [
+      "Losa de escalera — espesor y nivelación",
+      "Vigas de descanso",
+      "Muros de caja de escalera",
+      "Limpieza post-vaciado"
+    ],
+    "aplica_ph": false
+  },
+  {
+    "id": "electricas",
+    "num": 2,
+    "nombre": "Instalaciones Eléctricas",
+    "scope": "por_apto",
+    "items_3hab": [
+      "Tablero eléctrico — breakers y capacidad",
+      "Circuito cocina",
+      "Circuito A/A sala",
+      "Circuito A/A hab. principal",
+      "Circuito A/A hab. 2",
+      "Circuito A/A hab. 3",
+      "Tomas corrientes sala/comedor",
+      "Tomas corrientes habitaciones",
+      "Tomas corrientes baños",
+      "Apagadores — funcionamiento",
+      "Puntos de luz sala/comedor",
+      "Puntos de luz habitaciones",
+      "Puntos de luz baños",
+      "Punto extractor cocina",
+      "Prueba de continuidad"
+    ],
+    "items_2hab": [
+      "Tablero eléctrico — breakers y capacidad",
+      "Circuito cocina",
+      "Circuito A/A sala",
+      "Circuito A/A hab. principal",
+      "Circuito A/A hab. 2",
+      "Tomas corrientes sala/comedor",
+      "Tomas corrientes habitaciones",
+      "Tomas corrientes baños",
+      "Apagadores — funcionamiento",
+      "Puntos de luz sala/comedor",
+      "Puntos de luz habitaciones",
+      "Puntos de luz baños",
+      "Punto extractor cocina",
+      "Prueba de continuidad"
+    ],
+    "items_ph": [
+      "Circuito A/A family room",
+      "Tomas corrientes family room",
+      "Punto de luz baño",
+      "Punto de luz family room",
+      "Punto de luz terraza",
+      "Apagadores — funcionamiento"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "hidro",
+    "num": 3,
+    "nombre": "Instalaciones Hidrosanitarias",
+    "scope": "por_apto",
+    "items_apto": [
+      "Agua fría — presión correcta",
+      "Agua caliente — presión correcta",
+      "Aguas negras — pendiente y flujo",
+      "Aguas pluviales — conexión correcta",
+      "Prueba hidrostática — sin filtraciones",
+      "Baño principal — agua fría y caliente",
+      "Baño social — agua fría y caliente",
+      "Cocina — agua fría y caliente",
+      "Lavandería — punto de agua",
+      "Válvulas de cierre — funcionamiento",
+      "Observación de filtraciones"
+    ],
+    "items_ph": [
+      "Baño PH — agua fría y caliente",
+      "Prueba hidrostática",
+      "Sin filtraciones desde losa"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "panete",
+    "num": 4,
+    "nombre": "Terminación Pañete",
+    "scope": "exterior",
+    "items": [
+      "Fachada principal — alineación y plomada",
+      "Fachada principal — grosor uniforme",
+      "Fachada principal — sin fisuras ni grietas",
+      "Fachada principal — esquinas perfiladas",
+      "Fachada principal — listo para pintura",
+      "Fachada posterior — alineación y plomada",
+      "Fachada posterior — grosor uniforme",
+      "Fachada posterior — sin fisuras",
+      "Fachada posterior — esquinas perfiladas",
+      "Fachada lateral izquierda — alineación y plomada",
+      "Fachada lateral izquierda — grosor uniforme",
+      "Fachada lateral izquierda — sin fisuras",
+      "Fachada lateral derecha — alineación y plomada",
+      "Fachada lateral derecha — grosor uniforme",
+      "Fachada lateral derecha — sin fisuras",
+      "Balcones y terrazas — cara exterior pañeteada",
+      "Balcones y terrazas — sin fisuras",
+      "Balcones y terrazas — listo para pintura"
+    ],
+    "aplica_ph": false
+  },
+  {
+    "id": "estuco",
+    "num": 5,
+    "nombre": "Terminación Estucado",
+    "scope": "por_apto",
+    "items_apto": [
+      "Sala/comedor — superficie lisa y uniforme",
+      "Habitaciones — superficie lisa y uniforme",
+      "Pasillos internos — superficie lisa",
+      "Cocina — superficie lisa y uniforme",
+      "Sin marcas de llana",
+      "Sin fisuras",
+      "Listo para pintura"
+    ],
+    "items_ph": [
+      "Baño — superficie lisa",
+      "Family room — superficie lisa",
+      "Sin fisuras"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "pisos",
+    "num": 6,
+    "nombre": "Terminación Pisos",
+    "scope": "por_apto_y_escalera",
+    "items_apto": [
+      "Sala/comedor — nivelación y juntas",
+      "Habitaciones — nivelación y juntas",
+      "Baño principal — nivelación y drenaje",
+      "Baño social — nivelación y drenaje",
+      "Cocina — nivelación y juntas",
+      "Pasillos internos — nivelación y juntas",
+      "Sin piezas rotas o rajadas",
+      "Sin piezas flojas (prueba de golpe)",
+      "Juntas uniformes y limpias",
+      "Fragua aplicada correctamente",
+      "Pendiente correcta en baños hacia desagüe"
+    ],
+    "items_escalera": [
+      "Escalones — nivelación y antideslizante",
+      "Descansos — nivelación",
+      "Sin piezas rotas o rajadas",
+      "Sin piezas flojas",
+      "Juntas uniformes",
+      "Fragua aplicada"
+    ],
+    "items_ph": [
+      "Baño — nivelación y drenaje",
+      "Family room — nivelación y juntas",
+      "Terraza — impermeabilizante aplicado",
+      "Terraza — piso sobre impermeabilizante",
+      "Terraza — pendiente correcta hacia desagüe",
+      "Sin piezas flojas"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "ventanas",
+    "num": 7,
+    "nombre": "Instalación Ventanas / Barandas de Cristal",
+    "scope": "por_apto",
+    "items_3hab": [
+      "Ventana sala/comedor — fijación y sellado",
+      "Ventana hab. principal",
+      "Ventana hab. 2",
+      "Ventana hab. 3",
+      "Ventana baño principal",
+      "Ventana baño social",
+      "Ventana cocina",
+      "Baranda balcón/terraza — fijación y plomada",
+      "Sellado perimetral — sin infiltraciones",
+      "Apertura y cierre correcto",
+      "Sin ralladuras ni daños en cristal",
+      "Herrajes completos y funcionando"
+    ],
+    "items_2hab": [
+      "Ventana sala/comedor — fijación y sellado",
+      "Ventana hab. principal",
+      "Ventana hab. 2",
+      "Ventana baño principal",
+      "Ventana baño social",
+      "Ventana cocina",
+      "Baranda balcón/terraza — fijación y plomada",
+      "Sellado perimetral — sin infiltraciones",
+      "Apertura y cierre correcto",
+      "Sin ralladuras ni daños en cristal",
+      "Herrajes completos y funcionando"
+    ],
+    "items_ph": [
+      "Ventanal cristal family room/terraza — fijación",
+      "Sellado perimetral",
+      "Sin ralladuras",
+      "Apertura y cierre correcto"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "puertas",
+    "num": 8,
+    "nombre": "Instalación Puertas",
+    "scope": "por_apto",
+    "items_3hab": [
+      "Puerta de entrada — fijación y plomada",
+      "Puerta de entrada — cierre y chapa",
+      "Puerta hab. principal — fijación",
+      "Puerta hab. principal — chapa y bisagras",
+      "Puerta hab. 2 — fijación",
+      "Puerta hab. 2 — chapa y bisagras",
+      "Puerta hab. 3 — fijación",
+      "Puerta hab. 3 — chapa y bisagras",
+      "Puerta baño principal — fijación",
+      "Puerta baño principal — bisagras",
+      "Puerta baño social — fijación",
+      "Puerta baño social — bisagras",
+      "Marcos — fijación y nivelación",
+      "Sin golpes ni rayones en puertas"
+    ],
+    "items_2hab": [
+      "Puerta de entrada — fijación y plomada",
+      "Puerta de entrada — cierre y chapa",
+      "Puerta hab. principal — fijación",
+      "Puerta hab. principal — chapa y bisagras",
+      "Puerta hab. 2 — fijación",
+      "Puerta hab. 2 — chapa y bisagras",
+      "Puerta baño principal — fijación",
+      "Puerta baño principal — bisagras",
+      "Puerta baño social — fijación",
+      "Puerta baño social — bisagras",
+      "Marcos — fijación y nivelación",
+      "Sin golpes ni rayones en puertas"
+    ],
+    "items_ph": [
+      "Puerta baño PH — fijación",
+      "Puerta baño PH — bisagras y chapa",
+      "Marco — fijación y nivelación",
+      "Sin golpes ni rayones"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "closet",
+    "num": 9,
+    "nombre": "Instalación Clóset",
+    "scope": "por_apto",
+    "items_3hab": [
+      "Clóset hab. 2 — estructura y fijación",
+      "Clóset hab. 2 — puertas y correderas",
+      "Clóset hab. 2 — gavetas funcionamiento",
+      "Clóset hab. 2 — accesorios interiores completos",
+      "Clóset hab. 3 — estructura y fijación",
+      "Clóset hab. 3 — puertas y correderas",
+      "Clóset hab. 3 — gavetas funcionamiento",
+      "Clóset hab. 3 — accesorios interiores completos",
+      "Nivelación general",
+      "Sin daños en láminas o puertas"
+    ],
+    "items_2hab": [
+      "Clóset hab. 2 — estructura y fijación",
+      "Clóset hab. 2 — puertas y correderas",
+      "Clóset hab. 2 — gavetas funcionamiento",
+      "Clóset hab. 2 — accesorios interiores completos",
+      "Nivelación general",
+      "Sin daños en láminas o puertas"
+    ],
+    "items_ph": [],
+    "aplica_ph": false
+  },
+  {
+    "id": "cocinas",
+    "num": 10,
+    "nombre": "Instalación Cocinas",
+    "scope": "por_apto",
+    "items_apto": [
+      "Gabinetes altos — fijación y nivelación",
+      "Gabinetes bajos — fijación y nivelación",
+      "Puertas y bisagras — funcionamiento",
+      "Gavetas — funcionamiento",
+      "Panel lateral — fijación",
+      "Espacio para electrodomésticos — medidas correctas",
+      "Sin daños en láminas o puertas",
+      "Acabado uniforme",
+      "Jaladera/herrajes completos"
+    ],
+    "items_ph": [],
+    "aplica_ph": false
+  },
+  {
+    "id": "topes",
+    "num": 11,
+    "nombre": "Instalación Topes",
+    "scope": "por_apto",
+    "items_apto": [
+      "Tope cocina área de preparación — fijación y nivelación",
+      "Tope cocina área de preparación — sellado perimetral",
+      "Tope isla de cocina — fijación y nivelación",
+      "Tope isla de cocina — sellado perimetral",
+      "Sin grietas ni daños en superficie",
+      "Uniones bien selladas",
+      "Acabado y color uniforme"
+    ],
+    "items_ph": [],
+    "aplica_ph": false
+  },
+  {
+    "id": "fregadero",
+    "num": 12,
+    "nombre": "Instalación Fregadero",
+    "scope": "por_apto",
+    "items_apto": [
+      "Fregadero — fijación al tope",
+      "Conexión agua fría",
+      "Conexión agua caliente",
+      "Sifón y desagüe — flujo correcto",
+      "Sin filtraciones bajo el fregadero",
+      "Llave mezcladora — funcionamiento",
+      "Sellado perimetral",
+      "Sin ralladuras en el fregadero"
+    ],
+    "items_ph": [],
+    "aplica_ph": false
+  },
+  {
+    "id": "electro",
+    "num": 13,
+    "nombre": "Instalación Electrodomésticos",
+    "scope": "por_apto",
+    "items_apto": [
+      "Nevera — instalación en espacio correcto",
+      "Estufa/cocina — instalación y conexión",
+      "Extractor de cocina — instalación y funcionamiento",
+      "Microondas — instalación",
+      "Sin daños en los equipos",
+      "Funcionamiento general verificado"
+    ],
+    "items_ph": [],
+    "aplica_ph": false
+  },
+  {
+    "id": "aparatos_bano",
+    "num": 14,
+    "nombre": "Instalación Aparatos de Baño",
+    "scope": "por_apto",
+    "items_bano_principal": [
+      "Inodoro — fijación y funcionamiento",
+      "Inodoro — sin filtraciones en base",
+      "Lavamanos — fijación y nivelación",
+      "Lavamanos — conexión agua fría y caliente",
+      "Ducha/bañera — conexión y funcionamiento",
+      "Mezcladora ducha — funcionamiento",
+      "Accesorios (toallero, gancho, papel)",
+      "Espejo — fijación",
+      "Sellado general — sin filtraciones"
+    ],
+    "items_bano_social": [
+      "Inodoro — fijación y funcionamiento",
+      "Inodoro — sin filtraciones",
+      "Lavamanos — fijación y nivelación",
+      "Lavamanos — conexión agua",
+      "Ducha — conexión y funcionamiento",
+      "Mezcladora — funcionamiento",
+      "Accesorios completos",
+      "Espejo — fijación",
+      "Sellado — sin filtraciones"
+    ],
+    "items_ph": [
+      "Inodoro — fijación y funcionamiento",
+      "Lavamanos — fijación y conexión",
+      "Ducha — conexión y funcionamiento",
+      "Accesorios completos",
+      "Sellado — sin filtraciones"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "yeso",
+    "num": 15,
+    "nombre": "Terminación Yeso",
+    "scope": "por_apto",
+    "items_apto": [
+      "Sala/comedor — superficie lisa",
+      "Habitaciones — superficie lisa",
+      "Pasillos internos",
+      "Cocina",
+      "Sin marcas ni rayaduras",
+      "Esquinas rectas",
+      "Listo para pintura"
+    ],
+    "items_ph": [
+      "Baño — superficie lisa",
+      "Family room — superficie lisa"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "denglas",
+    "num": 16,
+    "nombre": "Terminación Denglas",
+    "scope": "mixto",
+    "items_cajetines": [
+      "Cajetines tuberías balcones — fijación",
+      "Cajetines bajantes fachada — fijación",
+      "Sin piezas flojas",
+      "Juntas uniformes",
+      "Sin manchas ni daños"
+    ],
+    "items_pasillos_nivel": [
+      "Denglas aplicada en pasillo",
+      "Sin piezas flojas",
+      "Juntas uniformes",
+      "Esquinas terminadas"
+    ],
+    "items_ascensor": [
+      "Denglas caja ascensor — aplicada",
+      "Sin piezas flojas",
+      "Juntas uniformes"
+    ],
+    "items_cocina_n4": [
+      "Muro denglas cocina — fijación (solo N4)",
+      "Sin piezas flojas",
+      "Juntas y acabado"
+    ],
+    "aplica_ph": false
+  },
+  {
+    "id": "pintura",
+    "num": 17,
+    "nombre": "Terminación Pintura",
+    "scope": "interior_exterior",
+    "items_interior_apto": [
+      "Sala/comedor — color uniforme, sin manchas",
+      "Habitaciones — color uniforme",
+      "Baños — pintura resistente humedad",
+      "Cocina — pintura resistente humedad",
+      "Pasillos internos",
+      "Techo — color uniforme",
+      "Sin chorreos ni marcas de rodillo",
+      "Sin zonas sin cubrir",
+      "Número de manos aplicadas",
+      "Zócalo/rodapié — limpio"
+    ],
+    "items_interior_ph": [
+      "Baño — color uniforme",
+      "Family room — color uniforme",
+      "Techo — color uniforme"
+    ],
+    "items_exterior": [
+      "Fachada principal — color uniforme",
+      "Fachada posterior — color uniforme",
+      "Fachada lateral izquierda",
+      "Fachada lateral derecha",
+      "Balcones — barandas y muros",
+      "Sin chorreos ni manchas",
+      "Sin zonas sin cubrir",
+      "Número de manos aplicadas",
+      "Acabado uniforme general"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "herreria",
+    "num": 18,
+    "nombre": "Instalación Herrería / Louvers",
+    "scope": "por_edificio",
+    "items_barandas_escalera": [
+      "Barandas escalera general N1 — fijación y plomada",
+      "Barandas escalera general N1 — altura reglamentaria",
+      "Barandas escalera general N2 — fijación y plomada",
+      "Barandas escalera general N2 — altura reglamentaria",
+      "Barandas escalera general N3 — fijación y plomada",
+      "Barandas escalera general N3 — altura reglamentaria",
+      "Barandas escalera general N4 — fijación y plomada",
+      "Barandas escalera general N4 — altura reglamentaria",
+      "Sin filos cortantes",
+      "Pintura anticorrosiva general"
+    ],
+    "items_louvers_escalera": [
+      "Louvers escalera general — fijación",
+      "Louvers escalera general — alineación",
+      "Sin daños en piezas"
+    ],
+    "items_louvers_fachada": [
+      "Louvers fachada — fijación a estructura",
+      "Louvers fachada — alineación y plomada",
+      "Piezas sintéticas — sin daños",
+      "Sellado perimetral",
+      "Acabado uniforme"
+    ],
+    "items_escaleras_ph": [
+      "Escalera interna PH01 — estructura y fijación",
+      "Escalera interna PH01 — barandas fijación y altura",
+      "Escalera interna PH01 — escalones nivelación",
+      "Escalera interna PH02 — estructura y fijación",
+      "Escalera interna PH02 — barandas fijación y altura",
+      "Escalera interna PH02 — escalones nivelación",
+      "Escalera interna PH03 — estructura y fijación",
+      "Escalera interna PH03 — barandas fijación y altura",
+      "Escalera interna PH03 — escalones nivelación",
+      "Escalera interna PH04 — estructura y fijación",
+      "Escalera interna PH04 — barandas fijación y altura",
+      "Escalera interna PH04 — escalones nivelación",
+      "Pintura anticorrosiva — todas las escaleras PH"
+    ],
+    "aplica_ph": false
+  },
+  {
+    "id": "accesorios_elec",
+    "num": 19,
+    "nombre": "Instalaciones Accesorios Eléctricos",
+    "scope": "por_apto",
+    "items_apto": [
+      "Placas tomas corrientes — instaladas y limpias",
+      "Placas apagadores — instaladas",
+      "Plafones de lámparas — instalados",
+      "Lámparas — funcionamiento",
+      "Timbre — funcionamiento",
+      "Sin cables expuestos",
+      "Prueba general de circuitos"
+    ],
+    "items_ph": [
+      "Placas tomas y apagadores",
+      "Lámparas family room",
+      "Lámpara baño",
+      "Lámpara terraza",
+      "Sin cables expuestos"
+    ],
+    "aplica_ph": true
+  },
+  {
+    "id": "ascensores",
+    "num": 20,
+    "nombre": "Instalación Ascensores",
+    "scope": "por_edificio",
+    "items": [
+      "Estructura del foso — revisión",
+      "Rieles y guías — alineación",
+      "Cabina — nivelación en cada parada",
+      "Puertas — apertura y cierre automático",
+      "Botonera interna — funcionamiento",
+      "Botonera externa N1 — funcionamiento",
+      "Botonera externa N2 — funcionamiento",
+      "Botonera externa N3 — funcionamiento",
+      "Botonera externa N4 — funcionamiento",
+      "Sistema de emergencia — alarma y luz",
+      "Capacidad de carga — prueba",
+      "Velocidad — dentro de especificación",
+      "Certificación técnica del instalador",
+      "Prueba de parada de emergencia",
+      "Sin ruidos anormales"
+    ],
+    "aplica_ph": false
+  }
+];
+
+const APTOS_CONFIG = {
+  '01': {tipo:'3hab', label:'Apto 01', habs:3},
+  '02': {tipo:'3hab', label:'Apto 02', habs:3},
+  '03': {tipo:'2hab', label:'Apto 03', habs:2},
+  '04': {tipo:'2hab', label:'Apto 04', habs:2}
+};
+const NIVELES_OBRA = ['N1','N2','N3','N4'];
+const PH_UNITS = ['PH01','PH02','PH03','PH04'];
+const CONTRATISTAS_LIST = ['SEMS','NESA','ABREU & ASOC','RJJ','GETOP','JOVECA','TEPINTEC','GLASSART','SINERGAMA','NOVOINSTALL','TALLERES BELLO','JARDINERIA ANAMARIA','REGADIO SOCRATES','MAESTRO VICTOR','MAESTRO ANGEL','MAESTRO ROBERT','MAESTRO LUIS'];
+
 const CATS = ["", "1-Estructura / Formaleta", "2-Vaciado de Concreto", "3-Varilla / Acero", "4-Pisos / Revestimiento", "5-Instalaciones Hidrosanitarias", "6-Instalaciones Eléctricas", "7-Estuco Acabados", "8-Pañete Acabados", "9-Impermeabilizante", "10-Albañilería / Mampostería", "11-Puertas", "12-Closets", "13-Ventanas", "14-Cocinas", "15-Terminación Yeso", "16-Terminación Denglas", "17-Movilización de Materiales y Otros"];
 
 // ── STATE ────────────────────────────────────────────────────────────────
@@ -508,9 +1175,13 @@ waitFirebase(() => {
       document.body.classList.remove('visor','colaborador','admin');
       document.body.classList.add(currentRol);
       periodoActivo = getPeriodoActual();
-      showScreen('screenEdificios');
-      await cargarPeriodos();
-      cargarEstadisticas();
+      periodoActivoRec = getPeriodoActual();
+      // Show home screen with module selector
+      showScreen('screenHome');
+      document.getElementById('breadcrumb').innerHTML = '<span class="current">Inicio</span>';
+      document.getElementById('homeUserInfo').textContent = currentRol === 'admin' ? '👑 Administrador' : currentRol === 'colaborador' ? '🔧 Colaborador' : '👁 Visor';
+      // Preload periods in background
+      cargarPeriodos();
 
       setupPWA();
       checkiOS();
@@ -614,7 +1285,7 @@ function volverEdificios() {
   if (unsubscribeListener) { unsubscribeListener(); unsubscribeListener=null; }
   currentEdificio = null;
   showScreen('screenEdificios');
-  document.getElementById('breadcrumb').innerHTML = `<span class="current">Edificios</span>`;
+  document.getElementById('breadcrumb').innerHTML = '<span class="crumb" onclick="showScreen('screenHome');updateBreadcrumbHome()" style="cursor:pointer;opacity:0.7;">Inicio</span><span class="sep">›</span><span class="current">Levantamiento</span>';
   cargarPeriodos();
   cargarEstadisticas();
 }
@@ -1136,6 +1807,10 @@ async function exportarInformeCompleto(nombrePersonalizado) {
 .periodo-archivo{background:var(--gray-light);color:var(--gray);font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;}
 .corregido-btn{width:100%;padding:9px;background:#2B6CB0;color:#fff;border:none;border-radius:5px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .corregido-btn:hover{background:#2C5282;}
+#screenHome{background:#F4F6FA;}
+#screenRecepciones{background:#F4F6FA;}
+#screenPartidas{background:#F4F6FA;overflow:hidden;}
+#screenActa{background:#F4F6FA;overflow:hidden;}
 .corregido-badge{display:inline-flex;align-items:center;gap:4px;background:#EBF8FF;color:#2B6CB0;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;border:1.5px solid #2B6CB0;}
 @media print{body{background:#fff;}.no-print{display:none;}}</style></head><body>
   <div style="background:#1B3A6B;color:#fff;display:flex;align-items:stretch;min-height:68px;print-color-adjust:exact;-webkit-print-color-adjust:exact;">
@@ -1257,8 +1932,521 @@ async function marcarCorregido(pinId) {
   renderPins();
 }
 
+// ── NAVEGACIÓN HOME ──────────────────────────────────────────────────────────
+function irALevantamiento() {
+  showScreen('screenEdificios');
+  document.getElementById('breadcrumb').innerHTML = '<span class="current">Edificios</span>';
+  cargarPeriodos();
+  cargarEstadisticas();
+}
+
+function irARecepciones() {
+  showScreen('screenRecepciones');
+  document.getElementById('breadcrumb').innerHTML = '<span style="color:var(--ok);font-weight:700;">✅ Recepciones</span>';
+  cargarPeriodosRec();
+  renderEdificiosRec();
+}
+
+function updateBreadcrumbHome() {
+  document.getElementById('breadcrumb').innerHTML = '<span class="current">Inicio</span>';
+}
+
+// ── RECEPCIONES ───────────────────────────────────────────────────────────────
+let periodoActivoRec = null;
+let currentEdificioRec = null;
+let currentPartidaId = null;
+let actaData = {}; // current acta being edited
+
+function cambiarPeriodoRec() {
+  var sel = document.getElementById('periodoSelectorRec');
+  if (sel) periodoActivoRec = sel.value;
+  renderEdificiosRec();
+}
+
+async function cargarPeriodosRec() {
+  if (!window._firebaseReady) return;
+  var db = window._db;
+  var { collection, getDocs } = window._fsLib;
+  try {
+    var snap = await getDocs(collection(db,'actas'));
+    var periodos = new Set();
+    snap.forEach(function(d) {
+      var a = d.data();
+      if (a.periodo) periodos.add(a.periodo);
+    });
+    periodos.add(getPeriodoActual());
+    var sorted = Array.from(periodos).sort().reverse();
+    var sel = document.getElementById('periodoSelectorRec');
+    if (!sel) return;
+    var current = getPeriodoActual();
+    sel.innerHTML = sorted.map(function(p) {
+      return '<option value="'+p+'"'+(p===periodoActivoRec?' selected':'')+'>'
+        +getMesLabel(p)+(p===current?' (activo)':'')+'</option>';
+    }).join('');
+    if (!periodoActivoRec) { periodoActivoRec = current; sel.value = current; }
+  } catch(e) {}
+}
+
+function renderEdificiosRec() {
+  var grid = document.getElementById('edificiosGridRec');
+  if (!grid) return;
+  var periodo = periodoActivoRec || getPeriodoActual();
+  grid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,20,21,22,23,24].map(function(num) {
+    var key = 'Edificio '+num;
+    return '<div class="edificio-card" onclick="seleccionarEdificioRec('+num+')" style="border-color:var(--ok);">' +
+      '<div class="ec-num" style="color:var(--ok);">'+String(num).padStart(2,'0')+'</div>' +
+      '<div class="ec-name">Edificio '+num+'</div>' +
+      '<div class="ec-empty" style="color:#38A169;font-size:10px;margin-top:4px;">Ver partidas →</div>' +
+    '</div>';
+  }).join('');
+}
+
+function seleccionarEdificioRec(num) {
+  currentEdificioRec = 'Edificio '+num;
+  showScreen('screenPartidas');
+  document.getElementById('partidasTitle').textContent = currentEdificioRec+' — Partidas de Recepción';
+  document.getElementById('partidasPeriodoBadge').textContent = getMesLabel(periodoActivoRec||getPeriodoActual());
+  document.getElementById('breadcrumb').innerHTML =
+    '<span style="color:var(--ok);font-weight:700;">✅ Recepciones</span>' +
+    '<span class="sep">›</span><span class="current">'+currentEdificioRec+'</span>';
+  renderPartidas();
+}
+
+function volverARecepciones() {
+  showScreen('screenRecepciones');
+  document.getElementById('breadcrumb').innerHTML = '<span style="color:var(--ok);font-weight:700;">✅ Recepciones</span>';
+}
+
+function volverAPartidas() {
+  showScreen('screenPartidas');
+  document.getElementById('breadcrumb').innerHTML =
+    '<span style="color:var(--ok);font-weight:700;">✅ Recepciones</span>' +
+    '<span class="sep">›</span><span class="current">'+currentEdificioRec+'</span>';
+}
+
+async function renderPartidas() {
+  var list = document.getElementById('partidasList');
+  // Load existing actas for this edificio+periodo
+  var actasExistentes = {};
+  if (window._firebaseReady) {
+    var db = window._db;
+    var { collection, getDocs, query, where } = window._fsLib;
+    try {
+      var q = query(collection(db,'actas'),
+        where('edificio','==',currentEdificioRec),
+        where('periodo','==',periodoActivoRec||getPeriodoActual()));
+      var snap = await getDocs(q);
+      snap.forEach(function(d) {
+        var a = d.data();
+        actasExistentes[a.partida_id] = a;
+      });
+    } catch(e) {}
+  }
+
+  var STATUS_ACTA = {'pendiente':'⚪','en_revision':'🔵','conforme':'✅','con_obs':'⚠️'};
+  var STATUS_LABEL = {'pendiente':'Pendiente','en_revision':'En revisión','conforme':'Recibido conforme','con_obs':'Con observaciones'};
+  var STATUS_COLOR = {'pendiente':VAR_GRAY,'en_revision':'#2B6CB0','conforme':'#38A169','con_obs':'#D69E2E'};
+
+  list.innerHTML = PARTIDAS_DEF.map(function(p, i) {
+    var acta = actasExistentes[p.id];
+    var estado = acta ? (acta.estado||'pendiente') : 'pendiente';
+    var contratista = acta ? (acta.contratista||'—') : '—';
+    var color = STATUS_COLOR[estado] || VAR_GRAY;
+    var canAccess = currentRol === 'admin' || currentRol === 'colaborador' ||
+      (currentRol === 'visor' && (!window._userEmpresa || acta?.contratista === window._userEmpresa));
+    return '<div onclick="'+(canAccess?'abrirActa(''+p.id+'')':'')+'" style="background:#fff;border:1.5px solid '+color+';border-radius:8px;padding:12px 16px;margin-bottom:10px;cursor:'+(canAccess?'pointer':'default')+';display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s;" ' +
+      (canAccess?'onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'"':'')+'>'+
+      '<div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:'+color+';width:32px;text-align:center;">'+String(p.num).padStart(2,'0')+'</div>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:13px;font-weight:700;color:var(--navy);">'+p.nombre+'</div>'+
+        '<div style="font-size:10px;color:var(--gray);margin-top:2px;">'+STATUS_LABEL[estado]+' '+STATUS_ACTA[estado]+(contratista!=='—'?' · '+contratista:'')+'</div>'+
+      '</div>'+
+      '<div style="font-size:11px;font-weight:700;color:'+color+';">'+(canAccess?'→':'🔒')+'</div>'+
+    '</div>';
+  }).join('');
+
+  function VAR_GRAY() { return '#718096'; }
+}
+
+// Dummy VAR_GRAY for inline use
+var VAR_GRAY = '#718096';
+
+async function abrirActa(partidaId) {
+  currentPartidaId = partidaId;
+  var partida = PARTIDAS_DEF.find(function(p) { return p.id === partidaId; });
+  if (!partida) return;
+
+  // Load existing acta from Firebase
+  actaData = { partida_id: partidaId, edificio: currentEdificioRec,
+    periodo: periodoActivoRec||getPeriodoActual(), estado:'pendiente',
+    contratista:'', ingeniero:'', fecha_inspeccion:'', observaciones_generales:'',
+    items:{}, fotos:[], firmado:false, firmado_por:'', firmado_fecha:'' };
+
+  if (window._firebaseReady) {
+    var db = window._db;
+    var { collection, getDocs, query, where } = window._fsLib;
+    try {
+      var q = query(collection(db,'actas'),
+        where('edificio','==',currentEdificioRec),
+        where('periodo','==',periodoActivoRec||getPeriodoActual()),
+        where('partida_id','==',partidaId));
+      var snap = await getDocs(q);
+      if (!snap.empty) actaData = snap.docs[0].data();
+    } catch(e) {}
+  }
+
+  showScreen('screenActa');
+  document.getElementById('actaTitle').textContent = String(partida.num).padStart(2,'0')+'. '+partida.nombre+' — '+currentEdificioRec;
+  document.getElementById('breadcrumb').innerHTML =
+    '<span style="color:var(--ok);font-weight:700;">✅ Recepciones</span><span class="sep">›</span>' +
+    '<span class="crumb" onclick="volverAPartidas()" style="cursor:pointer;opacity:0.7;">'+currentEdificioRec+'</span>' +
+    '<span class="sep">›</span><span class="current">'+partida.nombre+'</span>';
+  renderActa(partida);
+}
+
+function renderActa(partida) {
+  var canEdit = currentRol === 'admin' || currentRol === 'colaborador';
+  var ro = canEdit ? '' : 'disabled readonly';
+  var roSel = canEdit ? '' : 'disabled';
+
+  var contOpts = CONTRATISTAS_LIST.map(function(c) {
+    return '<option value="'+c+'"'+(actaData.contratista===c?' selected':'')+'>'+c+'</option>';
+  }).join('');
+
+  var estadoOpts = [
+    ['pendiente','⚪ Pendiente'],
+    ['en_revision','🔵 En revisión'],
+    ['conforme','✅ Recibido conforme'],
+    ['con_obs','⚠️ Con observaciones']
+  ].map(function(s) {
+    return '<option value="'+s[0]+'"'+(actaData.estado===s[0]?' selected':'')+'>'+s[1]+'</option>';
+  }).join('');
+
+  // Build checklist based on partida scope
+  var checklistHTML = buildChecklist(partida, canEdit);
+
+  // Fotos section
+  var fotosHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">' +
+    (actaData.fotos||[]).map(function(f, i) {
+      return '<div style="position:relative;"><img src="'+f+'" style="width:80px;height:80px;object-fit:cover;border-radius:6px;cursor:zoom-in;" onclick="openLightboxSrc(''+f+'')">'+
+        (canEdit?'<button onclick="eliminarFotoActa('+i+')" style="position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;">×</button>':'')+'</div>';
+    }).join('') +
+    (canEdit?'<div onclick="triggerFotoActa()" style="width:80px;height:80px;border:2px dashed var(--gray-line);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray);font-size:22px;" title="Agregar foto">+</div>':'') +
+  '</div>';
+
+  // Firma section
+  var firmaHTML = actaData.firmado ?
+    '<div style="background:#F0FFF4;border:1.5px solid #38A169;border-radius:6px;padding:10px 14px;display:flex;align-items:center;gap:10px;">'+
+      '<span style="font-size:20px;">✅</span>'+
+      '<div><div style="font-size:12px;font-weight:700;color:#38A169;">Firmado digitalmente</div>'+
+      '<div style="font-size:10px;color:var(--gray);">'+actaData.firmado_por+' · '+actaData.firmado_fecha+'</div></div>'+
+      (canEdit?'<button onclick="deshacarFirma()" style="margin-left:auto;font-size:10px;padding:4px 10px;background:transparent;color:#E53E3E;border:1px solid #E53E3E;border-radius:4px;cursor:pointer;">Deshacer</button>':'')+'</div>' :
+    (canEdit?'<button onclick="firmarActa()" style="width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;">✍ Firmar digitalmente como Ing. responsable</button>':'<div style="color:var(--gray);font-size:11px;font-style:italic;">Pendiente de firma del ingeniero responsable</div>');
+
+  document.getElementById('actaContent').innerHTML =
+    // Header info
+    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:12px;">Información General del Acta</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Contratista responsable</label>'+
+          '<select id="acta_contratista" '+roSel+' style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;">'+
+          '<option value="">— Seleccionar —</option>'+contOpts+'</select></div>'+
+        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Estado del acta</label>'+
+          '<select id="acta_estado" '+roSel+' style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;">'+estadoOpts+'</select></div>'+
+        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Ingeniero inspector</label>'+
+          '<input type="text" id="acta_ingeniero" '+ro+' value="'+(actaData.ingeniero||'')+'" placeholder="Nombre completo" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;"></div>'+
+        '<div><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Fecha de inspección</label>'+
+          '<input type="date" id="acta_fecha" '+ro+' value="'+(actaData.fecha_inspeccion||'')+'" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;"></div>'+
+      '</div>'+
+      '<div style="margin-top:10px;"><label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);">Observaciones generales</label>'+
+        '<textarea id="acta_obs" '+ro+' placeholder="Observaciones generales del acta…" style="width:100%;border:none;border-bottom:1.5px solid var(--gray-line);padding:4px 2px;font-size:12px;font-family:'Inter',sans-serif;background:transparent;outline:none;margin-top:2px;min-height:50px;resize:vertical;">'+(actaData.observaciones_generales||'')+'</textarea></div>'+
+    '</div>'+
+
+    // Checklist
+    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:12px;">Lista de Verificación</div>'+
+      checklistHTML+
+    '</div>'+
+
+    // Fotos
+    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;">Fotografías de Evidencia</div>'+
+      fotosHTML+
+    '</div>'+
+
+    // Firma
+    '<div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px;border:1px solid var(--gray-line);">'+
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;">Firma Digital</div>'+
+      firmaHTML+
+    '</div>';
+}
+
+function buildChecklist(partida, canEdit) {
+  var html = '';
+  var scope = partida.scope;
+  var items = actaData.items || {};
+
+  function itemRow(key, label, indent) {
+    var val = items[key] || 'pendiente';
+    var ind = indent ? 'margin-left:20px;' : '';
+    var opts = [
+      ['pendiente','⚪','#718096'],
+      ['ok','✅','#38A169'],
+      ['obs','⚠️','#D69E2E'],
+      ['no_aplica','N/A','#a0aec0']
+    ].map(function(o) {
+      return '<option value="'+o[0]+'"'+(val===o[0]?' selected':'')+'>'+o[1]+' '+o[0].charAt(0).toUpperCase()+o[0].slice(1).replace('_',' ')+'</option>';
+    }).join('');
+    var selectHTML = canEdit ?
+      '<select onchange="updateItem(''+key+'',this.value)" style="font-size:10px;border:none;border-bottom:1px solid var(--gray-line);background:transparent;outline:none;padding:2px 4px;font-family:'Inter',sans-serif;">'+opts+'</select>' :
+      '<span style="font-size:11px;">'+({'pendiente':'⚪','ok':'✅','obs':'⚠️','no_aplica':'N/A'}[val]||'⚪')+'</span>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid #f0f0f0;'+ind+'">'+
+      '<div style="flex:1;font-size:11px;color:var(--navy);">'+label+'</div>'+
+      selectHTML+
+    '</div>';
+  }
+
+  function sectionHeader(title, color) {
+    color = color || 'var(--navy)';
+    return '<div style="background:'+color+';color:#fff;padding:6px 10px;border-radius:4px;margin:10px 0 6px;font-size:11px;font-weight:700;letter-spacing:0.5px;">'+title+'</div>';
+  }
+
+  if (scope === 'exterior' || scope === 'por_edificio') {
+    // Global items
+    var itemList = partida.items || [];
+    itemList.forEach(function(item) {
+      var key = 'general_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase();
+      html += itemRow(key, item, false);
+    });
+    // Sub-items for herreria
+    if (partida.id === 'herreria') {
+      html += sectionHeader('Barandas Escalera General','#1B3A6B');
+      (partida.items_barandas_escalera||[]).forEach(function(item) {
+        html += itemRow('baranda_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+      html += sectionHeader('Louvers Escalera','#2558A8');
+      (partida.items_louvers_escalera||[]).forEach(function(item) {
+        html += itemRow('louver_esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+      html += sectionHeader('Louvers Fachada','#2558A8');
+      (partida.items_louvers_fachada||[]).forEach(function(item) {
+        html += itemRow('louver_fach_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+      html += sectionHeader('Escaleras Internas PH (N4→N5)','#6B46C1');
+      (partida.items_escaleras_ph||[]).forEach(function(item) {
+        html += itemRow('esc_ph_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+    }
+    if (partida.id === 'ascensores') {
+      (partida.items||[]).forEach(function(item) {
+        html += itemRow('asc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+    }
+  } else if (scope === 'mixto' && partida.id === 'denglas') {
+    html += sectionHeader('Cajetines Exteriores — Balcones y Fachadas','#1B3A6B');
+    (partida.items_cajetines||[]).forEach(function(item) {
+      html += itemRow('cajext_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+    });
+    ['N1','N2','N3','N4'].forEach(function(n) {
+      html += sectionHeader('Pasillos Generales — '+n,'#2558A8');
+      (partida.items_pasillos_nivel||[]).forEach(function(item) {
+        html += itemRow('pasillo_'+n+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+    });
+    html += sectionHeader('Caja de Ascensores','#718096');
+    (partida.items_ascensor||[]).forEach(function(item) {
+      html += itemRow('asc_caja_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+    });
+    html += sectionHeader('Muro Denglas Cocina — Solo N4 (Aptos 401-404)','#D69E2E');
+    (partida.items_cocina_n4||[]).forEach(function(item) {
+      html += itemRow('den_coc_n4_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+    });
+  } else if (scope === 'interior_exterior' && partida.id === 'pintura') {
+    // Interior by apto
+    ['N1','N2','N3','N4'].forEach(function(n) {
+      ['01','02','03','04'].forEach(function(a) {
+        var label = a==='01'||a==='02' ? 'Apto '+a+' (3 hab)' : 'Apto '+a+' (2 hab)';
+        html += sectionHeader(n+' — '+label+' — Interior','#1B3A6B');
+        (partida.items_interior_apto||[]).forEach(function(item) {
+          html += itemRow('int_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        });
+        // Obs per apto
+        html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_int_'+n+'_'+a+'',this.value)" placeholder="Observación apto '+a+' '+n+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_int_'+n+'_'+a]||'')+'</textarea></div>';
+      });
+    });
+    // PH interior
+    html += sectionHeader('PH — Interior (Family Room, Baño, Techo)','#6B46C1');
+    ['PH01','PH02','PH03','PH04'].forEach(function(ph) {
+      html += sectionHeader(ph,'#8B5CF6');
+      (partida.items_interior_ph||[]).forEach(function(item) {
+        html += itemRow('int_ph_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+    });
+    // Exterior global
+    html += sectionHeader('Exterior — Fachadas Generales','#1B3A6B');
+    (partida.items_exterior||[]).forEach(function(item) {
+      html += itemRow('ext_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+    });
+  } else {
+    // por_apto scope (most partidas)
+    ['N1','N2','N3','N4'].forEach(function(n) {
+      ['01','02','03','04'].forEach(function(a) {
+        var tipo = (a==='01'||a==='02') ? '3hab' : '2hab';
+        var label = tipo==='3hab' ? 'Apto '+a+' (3 hab)' : 'Apto '+a+' (2 hab)';
+        var itemList = partida['items_'+tipo] || partida.items_apto || partida['items_bano_principal'] ? null : [];
+
+        // Special handling for aparatos_bano
+        if (partida.id === 'aparatos_bano') {
+          html += sectionHeader(n+' — '+label+' — Baño Principal','#1B3A6B');
+          (partida.items_bano_principal||[]).forEach(function(item) {
+            html += itemRow('bp_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          });
+          html += sectionHeader(n+' — '+label+' — Baño Social','#2558A8');
+          (partida.items_bano_social||[]).forEach(function(item) {
+            html += itemRow('bs_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          });
+        } else if (partida.id === 'formaleta') {
+          html += sectionHeader(n+' — Nivel General','#1B3A6B');
+          if (a === '01') { // Show nivel items only once
+            (partida.items_generales_nivel||[]).forEach(function(item) {
+              html += itemRow('niv_'+n+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+            });
+          }
+          html += sectionHeader(n+' — '+label,'#2558A8');
+          (partida.items_por_apto||[]).forEach(function(item) {
+            html += itemRow('apto_'+n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+          });
+          if (n==='N1' && a==='01') {
+            html += sectionHeader('Escalera General','#6B46C1');
+            (partida.items_escalera||[]).forEach(function(item) {
+              html += itemRow('esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+            });
+          }
+        } else {
+          var items_to_show = partida['items_'+tipo] || partida.items_apto || [];
+          if (items_to_show.length > 0) {
+            html += sectionHeader(n+' — '+label,'#1B3A6B');
+            items_to_show.forEach(function(item) {
+              html += itemRow(n+'_'+a+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+            });
+            html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_'+n+'_'+a+'',this.value)" placeholder="Observación '+label+' '+n+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_'+n+'_'+a]||'')+'</textarea></div>';
+          }
+        }
+      });
+    });
+
+    // PH section
+    if (partida.aplica_ph && partida.items_ph && partida.items_ph.length > 0) {
+      ['PH01','PH02','PH03','PH04'].forEach(function(ph) {
+        html += sectionHeader(ph+' (Penthouse — continuación N4)','#6B46C1');
+        partida.items_ph.forEach(function(item) {
+          html += itemRow('ph_'+ph+'_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+        });
+        html += '<div style="margin:4px 0;"><textarea onchange="updateItem('obs_ph_'+ph+'',this.value)" placeholder="Observación '+ph+'…" style="width:100%;font-size:11px;border:1px solid var(--gray-line);border-radius:4px;padding:4px;font-family:'Inter',sans-serif;resize:vertical;min-height:36px;">'+(items['obs_ph_'+ph]||'')+'</textarea></div>';
+      });
+    }
+
+    // Pisos escalera general
+    if (partida.id === 'pisos' && partida.items_escalera) {
+      html += sectionHeader('Escalera General','#6B46C1');
+      partida.items_escalera.forEach(function(item) {
+        html += itemRow('pisos_esc_'+item.replace(/[^a-z0-9]/gi,'_').toLowerCase(), item, false);
+      });
+    }
+  }
+  return html || '<div style="color:var(--gray);font-size:11px;font-style:italic;">Sin items de verificación definidos.</div>';
+}
+
+function updateItem(key, value) {
+  if (!actaData.items) actaData.items = {};
+  actaData.items[key] = value;
+}
+
+async function guardarActa() {
+  if (!window._firebaseReady) { alert('Sin conexión'); return; }
+  // Collect form data
+  actaData.contratista = document.getElementById('acta_contratista')?.value || '';
+  actaData.estado = document.getElementById('acta_estado')?.value || 'pendiente';
+  actaData.ingeniero = document.getElementById('acta_ingeniero')?.value || '';
+  actaData.fecha_inspeccion = document.getElementById('acta_fecha')?.value || '';
+  actaData.observaciones_generales = document.getElementById('acta_obs')?.value || '';
+  actaData.actualizado = new Date().toLocaleString('es-DO',{dateStyle:'short',timeStyle:'short'});
+  actaData.actualizado_por = currentUser?.email || '';
+
+  var db = window._db;
+  var { doc, setDoc } = window._fsLib;
+  var actaId = currentEdificioRec.replace(' ','_')+'_'+currentPartidaId+'_'+(periodoActivoRec||getPeriodoActual());
+  try {
+    await setDoc(doc(db,'actas',actaId), actaData);
+    var btn = document.getElementById('btnGuardarActa');
+    if (btn) { btn.textContent='✓ Guardado'; btn.style.background='#38A169';
+      setTimeout(function(){ btn.textContent='💾 Guardar'; btn.style.background=''; },1800); }
+  } catch(e) { alert('Error al guardar: '+e.message); }
+}
+
+function firmarActa() {
+  if (!confirm('¿Firmar digitalmente esta acta como Ingeniero responsable?')) return;
+  actaData.firmado = true;
+  actaData.firmado_por = currentUser?.email || '';
+  actaData.firmado_fecha = new Date().toLocaleString('es-DO',{dateStyle:'short',timeStyle:'short'});
+  guardarActa().then(function() {
+    var partida = PARTIDAS_DEF.find(function(p){ return p.id===currentPartidaId; });
+    if (partida) renderActa(partida);
+  });
+}
+
+function deshacarFirma() {
+  if (!confirm('¿Deshacer la firma de esta acta?')) return;
+  actaData.firmado = false; actaData.firmado_por = ''; actaData.firmado_fecha = '';
+  guardarActa().then(function() {
+    var partida = PARTIDAS_DEF.find(function(p){ return p.id===currentPartidaId; });
+    if (partida) renderActa(partida);
+  });
+}
+
+// Fotos en acta
+var _fotoActaInput = null;
+function triggerFotoActa() {
+  if (!_fotoActaInput) {
+    _fotoActaInput = document.createElement('input');
+    _fotoActaInput.type='file'; _fotoActaInput.accept='image/*';
+    _fotoActaInput.onchange = function(e) {
+      var file = e.target.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = async function(ev) {
+        var compressed = await comprimirFoto(ev.target.result,900,0.75);
+        if (!actaData.fotos) actaData.fotos=[];
+        actaData.fotos.push(compressed);
+        var partida = PARTIDAS_DEF.find(function(p){ return p.id===currentPartidaId; });
+        if (partida) renderActa(partida);
+      };
+      reader.readAsDataURL(file);
+      e.target.value='';
+    };
+  }
+  _fotoActaInput.click();
+}
+
+function eliminarFotoActa(idx) {
+  if (!confirm('¿Eliminar esta foto?')) return;
+  actaData.fotos.splice(idx,1);
+  var partida = PARTIDAS_DEF.find(function(p){ return p.id===currentPartidaId; });
+  if (partida) renderActa(partida);
+}
+
+function openLightboxSrc(src) {
+  document.getElementById('lbImg').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+
+async function exportarActaPDF() {
+  alert('La exportación PDF del acta estará disponible en la próxima actualización. Por ahora puede usar el botón "Imprimir" del navegador para generar un PDF.');
+}
+
+// Update auth flow to show home screen instead of edificios
 // ── INIT ──────────────────────────────────────────────────────────────────────
 periodoActivo = getPeriodoActual();
+periodoActivoRec = getPeriodoActual();
 cargarEdificio();
 setNivel('N1');
 updateCounter();
