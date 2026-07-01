@@ -2056,27 +2056,36 @@ async function renderPartidas() {
     } catch(e) {}
   }
 
-  var STATUS_ACTA = {'pendiente':'⚪','en_revision':'🔵','conforme':'✅','con_obs':'⚠️'};
-  var STATUS_LABEL = {'pendiente':'Pendiente','en_revision':'En revisión','conforme':'Recibido conforme','con_obs':'Con observaciones'};
-  var STATUS_COLOR = {'pendiente':VAR_GRAY,'en_revision':'#2B6CB0','conforme':'#38A169','con_obs':'#D69E2E'};
+  var STATUS_ACTA = {pendiente:'⚪',en_revision:'🔵',conforme:'✅',con_obs:'⚠️'};
+  var STATUS_LABEL = {pendiente:'Pendiente',en_revision:'En revisión',conforme:'Recibido conforme',con_obs:'Con observaciones'};
+  var STATUS_COLOR = {pendiente:'#718096',en_revision:'#2B6CB0',conforme:'#38A169',con_obs:'#D69E2E'};
 
-  list.innerHTML = PARTIDAS_DEF.map(function(p, i) {
+  var rows = [];
+  PARTIDAS_DEF.forEach(function(p) {
     var acta = actasExistentes[p.id];
     var estado = acta ? (acta.estado||'pendiente') : 'pendiente';
-    var contratista = acta ? (acta.contratista||'—') : '—';
-    var color = STATUS_COLOR[estado] || VAR_GRAY;
+    var contratista = acta ? (acta.contratista||'') : '';
+    var color = STATUS_COLOR[estado] || '#718096';
     var canAccess = currentRol === 'admin' || currentRol === 'colaborador' ||
-      (currentRol === 'visor' && (!window._userEmpresa || acta?.contratista === window._userEmpresa));
-    return '<div onclick="'+(canAccess?'abrirActa(''+p.id+'')':'')+'" style="background:#fff;border:1.5px solid '+color+';border-radius:8px;padding:12px 16px;margin-bottom:10px;cursor:'+(canAccess?'pointer':'default')+';display:flex;align-items:center;gap:12px;transition:box-shadow 0.15s;" ' +
-      (canAccess?'onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='none'"':'')+'>'+
-      '<div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:'+color+';width:32px;text-align:center;">'+String(p.num).padStart(2,'0')+'</div>'+
-      '<div style="flex:1;">'+
-        '<div style="font-size:13px;font-weight:700;color:var(--navy);">'+p.nombre+'</div>'+
-        '<div style="font-size:10px;color:var(--gray);margin-top:2px;">'+STATUS_LABEL[estado]+' '+STATUS_ACTA[estado]+(contratista!=='—'?' · '+contratista:'')+'</div>'+
-      '</div>'+
-      '<div style="font-size:11px;font-weight:700;color:'+color+';">'+(canAccess?'→':'🔒')+'</div>'+
+      (currentRol === 'visor' && (!window._userEmpresa || contratista === window._userEmpresa));
+    var numStr = String(p.num).padStart(2,'0');
+    var estadoLabel = STATUS_LABEL[estado] || 'Pendiente';
+    var estadoIcon = STATUS_ACTA[estado] || '⚪';
+    var contratistaStr = contratista ? ' · ' + contratista : '';
+    var arrow = canAccess ? '→' : '🔒';
+    var cursor = canAccess ? 'pointer' : 'default';
+    var onclick = canAccess ? 'abrirActa("' + p.id + '")' : '';
+    var div = '<div onclick="' + onclick + '" style="background:#fff;border:1.5px solid ' + color + ';border-radius:8px;padding:12px 16px;margin-bottom:10px;cursor:' + cursor + ';display:flex;align-items:center;gap:12px;">' +
+      '<div style="font-size:22px;font-weight:700;color:' + color + ';width:32px;text-align:center;font-family:sans-serif;">' + numStr + '</div>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:13px;font-weight:700;color:var(--navy);">' + p.nombre + '</div>' +
+        '<div style="font-size:10px;color:var(--gray);margin-top:2px;">' + estadoLabel + ' ' + estadoIcon + contratistaStr + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;font-weight:700;color:' + color + ';">' + arrow + '</div>' +
     '</div>';
-  }).join('');
+    rows.push(div);
+  });
+  list.innerHTML = rows.join('');
 
   function VAR_GRAY() { return '#718096'; }
 }
